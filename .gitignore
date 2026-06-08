@@ -1,0 +1,35 @@
+# Quarto
+/_site/
+/.quarto/
+*_files/
+
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+
+# R
+.Rproj.user/
+.Rhistory
+.RData
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+
+# Large data (should be on Zenodo)
+*.csv.gz
+*.parquet
+*.h5
+
+# Credentials
+.env
+*.pem

@@ -1,0 +1,31 @@
+---
+title: "Your Title Here"
+author:
+  - name: "Your Name"
+    affiliation: "Your Institution"
+    orcid: "0000-0000-0000-0000"
+date: last-modified
+abstract: |
+  Brief description of what this paper does and why it matters.
+  Replace this with your actual abstract.
+bibliography: references.bib
+format:
+  html:
+    code-fold: true
+    code-tools: true
+    toc: true
+---
+
+Your paper goes here. Structure it however makes sense.
+
+```{python}
+#| echo: true
+
+# Your code here
+print("Hello from Working Papers in Critical Search")
+```
+
+## References
+
+::: {#refs}
+:::
