@@ -9,14 +9,19 @@
   .wpcs-viz__frame {
     position: relative;
     width: 100%;
-    height: 580px;
+    /* !important so an embed's scoped `#viz-X { height: 100% }` (an ID selector,
+       higher specificity) can't override the frame's fixed height and collapse
+       the inner flex column — which left the map children at height:0. */
+    height: 580px !important;
     border: 1px solid #cfcfd6;
     border-radius: 7px;
     overflow: hidden;
     background: #0d0d10;
     box-shadow: 0 1px 3px rgba(0,0,0,0.10), 0 8px 24px rgba(0,0,0,0.06);
   }
-  .wpcs-viz__frame .leaflet-container { background: #000; font: inherit; }
+  /* Belt-and-suspenders: the Leaflet container must always fill the area its
+     flex parent allots it, and never collapse below a usable height. */
+  .wpcs-viz__frame .leaflet-container { background: #000; font: inherit; min-height: 240px; }
   .wpcs-viz figcaption {
     font-size: 0.84rem;
     color: #54555f;
@@ -39,7 +44,19 @@
     background: #0d0d10; z-index: 5;
   }
   .wpcs-viz__frame.is-ready .wpcs-viz__loading { display: none; }
+  /* On wide screens the data-dense maps would feel cramped inside the 760px
+     prose measure, so break the figures out and centre them on the viewport
+     while the body text stays at a comfortable reading width. A ResizeObserver
+     in each embed calls map.invalidateSize() when this width changes. */
+  @media (min-width: 1024px) {
+    .wpcs-viz {
+      position: relative;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(1200px, 92vw);
+    }
+  }
   @media (max-width: 720px) {
-    .wpcs-viz__frame { height: 480px; }
+    .wpcs-viz__frame { height: 480px !important; }
   }
 </style>

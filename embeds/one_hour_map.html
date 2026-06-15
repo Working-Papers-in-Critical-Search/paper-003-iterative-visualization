@@ -161,6 +161,7 @@
     // Initialize map
     function initMap() {
       map = L.map('onehour-map', { scrollWheelZoom: false }).setView([52.12, -106.67], 9);
+      if (window.ResizeObserver) new ResizeObserver(function () { map.invalidateSize(); }).observe(root);
 
       L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
         attribution: '&copy; OpenStreetMap contributors &copy; CARTO',

@@ -51,9 +51,7 @@ Claude Code is a coding LLM that runs in a terminal window. Working with it look
 
 My first session with Claude Code began with two datasets and a straightforward question. I said, "I have my knowledge graph and the Historical Canadian Railroads GIS data, and I want to understand how they connect. Can you help me see that?" Claude Code wrote scripts that created visual representations of Saskatchewan's railway network and the urban municipalities it serviced, complete with dates for the railway's arrival at each place and which company serviced it. Within a few days, I created an early iteration of what became my One Hour Railway Corridor visualization, which is a map showing how far a person could travel by rail in an hour from any given settlement. Using Claude Code, I created the visualization and learned to push it to GitHub where I could share the interactive visualization online with my supervisor and colleagues. I have lived in Saskatchewan my whole life and have experienced its distances but seeing them in railway time rather than driving time shifted my thinking. The settler mythology I had internalized about individual lone pioneers making their rugged living on the prairies started to give way to something more structural: these places were not isolated. They were nodes in a network, and the network had a shape.
 
-::: {.column-page}
 {{< include embeds/one_hour_map.html >}}
-:::
 
 What followed over the next several months was an iterative process structured around variations of that same question. Each session began with a dataset, a relationship between datasets, or a formed research question. Each session ended with a prototype, a refined question, a decision to abandon an approach, or a recognition that the data pointed somewhere more interesting than the original question had assumed. It was a speedy, cumulative workflow. Being able to test an idea within a session rather than across weeks changed which ideas were worth testing. A question that might have been set aside as too ambitious or too uncertain became worth pursuing when the time cost of trying it was an afternoon rather than a month.
 
@@ -71,21 +69,15 @@ What that iterative process produced, across months of sessions, was a different
 
 The Economic Hierarchy Map was a major output that answered one question while generating several more. Displaying all 429 settlements coloured by their commercial functions, it showed that the 'urban municipality' label was not bureaucratic convenience: the settlements fell into four distinct commercial tiers, visible across the province. Visualizing settlements by their tiers also showed that they were not evenly distributed across the settlement network; there were clusters of similar settlement types in unexpected places. This suggested that tiers did not solely emerge from the needs of settlers in the area, but instead hinted at other forces that I continued to explore through iterative analysis. That typology became a central framework of my analysis. It was not just a confirmation that these were genuinely urban places, but a new vocabulary for asking what differentiated them from one another.
 
-::: {.column-page}
 {{< include embeds/economic_hierarchy.html >}}
-:::
 
 Another instance came from limitations in existing data. The railway's geography had been thoroughly documented, but I could not find information on its impact on settlement density or distribution. In exploring this question with the LLM, we created a visualization with two modes: geographic and force-directed. The network graph offers a toggle between a geographic view, where settlements appear at their actual coordinates, and a force-directed network view, where settlements are positioned by their connection density. That toggle made my question visible. In network view, eight settlements emerged as multi-railway junction nodes with significantly higher connection density. While some, like the province's cities, were more obvious, other smaller junctions like Nokomis and Biggar were less so. These structural patterns became questions worth investigating because they became visible.
 
-::: {.column-page}
 {{< include embeds/network_graph.html >}}
-:::
 
 Understanding how the railway network was built across the province required seeing the progress itself, not the results of that progress. That required data in motion, so I created the railway network timeline. It is a year-by-year animation of the province-wide network from 1882 to 1920, with a bar chart showing the number of settlements added each year. This made it possible to ask about the network as a sequence of events rather than a fixed fact. When did each company's expansion accelerate? Where did the infill happen, and when? An animated map showed me new questions about the process through which these things happened.
 
-::: {.column-page}
 {{< include embeds/railway_timeline.html >}}
-:::
 
 The last example came from a question at the heart of my research. As part of the Mapping Settler Colonialism project, my colleagues Ashley Rabbitskin and Julian Rioux had mapped First Nations reserve surrenders in Saskatchewan. I wanted to know if there was a relationship between the urban network I had discovered and those surrenders. Overlaying the reserve surrender data onto the settlement and railway data made the relationships between them visible in a new way. What that overlay showed was a pattern that no singular dataset could have demonstrated: surrendered parcels were not distributed evenly across the province but clustered in proximity to railway lines and within the reach of the commercial network. That observation did not constitute a finding; it constituted a question worth testing rigorously. The visualization was the instrument that made the question visible enough to pursue.
 

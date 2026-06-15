@@ -157,6 +157,7 @@
     var settlements = {}, markers = {}, activeFilters = new Set(['City', 'RSC', 'LSC', 'SSC']);
 
     var map = L.map('econ-map', { zoomSnap: 0.5, scrollWheelZoom: false }).setView([52.0, -106.0], 6);
+    if (window.ResizeObserver) new ResizeObserver(function () { map.invalidateSize(); }).observe(root);
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
       attribution: '&copy; OpenStreetMap contributors &copy; CARTO', subdomains: 'abcd', maxZoom: 19
     }).addTo(map);
