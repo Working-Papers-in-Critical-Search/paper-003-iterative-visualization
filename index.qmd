@@ -5,6 +5,7 @@ author:
   - name: Jessica Jack
     affiliation: University of Saskatchewan
 date: "2026-06-15"
+doi: 10.5281/zenodo.20706174
 abstract: |
   Agentic coding assistants have changed what is tractable for historians
   without a technical background. This paper documents an iterative,
