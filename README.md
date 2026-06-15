@@ -1,41 +1,46 @@
-# Paper template — Working Papers in Critical Search
+# What Became Possible: Iterative Visualization with an LLM as a Research Method in Computational History
 
-Starting point for a paper in [*Working Papers in Critical Search*](https://working-papers-in-critical-search.github.io/home/). Click **Use this template** to create your own repo, then write in `index.qmd`.
+**Jessica Jack** · University of Saskatchewan
 
-## Quick start
+Paper 003 in [*Working Papers in Critical Search*](https://working-papers-in-critical-search.github.io/home/).
 
-1. Click **Use this template → Create a new repository**, owner = your own GitHub account, name = `paper-your-short-title`.
-2. Clone the new repo locally.
-3. Edit `index.qmd` (your paper) and `references.bib` (your bibliography). Structure the paper however makes sense for the work — no required format.
-4. Preview with `quarto preview`. The site renders to `_site/` on `quarto render`.
-5. When the work is ready for editorial review, email an editor with the repo URL. Editors handle the handoff into the journal organisation, GitHub Pages setup, release tagging, and DOI minting. See the full [submission guide](https://working-papers-in-critical-search.github.io/home/submit.html).
+Read it: <https://working-papers-in-critical-search.github.io/paper-003-iterative-visualization/>
+
+## Abstract
+
+Agentic coding assistants have changed what is tractable for historians without a
+technical background. This paper documents an iterative, LLM-supported
+visualization method developed over the first months of an MA thesis on
+Saskatchewan's urban settler network and Indigenous dispossession, 1880–1921.
+Working in plain-English prompts with Claude Code, the author brought three
+otherwise incompatible datasets — a census-derived knowledge graph, a historical
+railway GIS layer, and reserve surrender records — into conversation without
+writing code by hand. The argument is that the value of the method lay not in the
+answers it produced but in the questions it made askable: the analytical work
+migrated from programming to history. Several of the resulting interactive
+visualizations are embedded live in the paper; the experiments that failed are
+shown as static figures, because recognizing them as failures was itself a
+research outcome.
 
 ## What's in here
 
 ```
-├── index.qmd                   # Your paper (edit this)
-├── references.bib              # Bibliography
-├── data/                       # Small data files (< 10MB) — larger goes on Zenodo / Hugging Face
-├── figures/                    # Images, plots
-├── _quarto.yml                 # Quarto site config (leave alone unless you know why)
-├── _custom.scss / _tokens.scss # Shared journal chrome — leave alone
-├── _paper.scss                 # Paper-page typography and layout — leave alone
-├── _includes/                  # Topbar, footer, fonts — leave alone
-├── .github/workflows/          # Auto-deploy on push to `main`
-└── README.md                   # This file (replace with your abstract before submission)
+├── index.qmd                   # The paper
+├── embeds/                     # Live, scoped interactive visualizations embedded in the paper
+├── data/                       # Knowledge-graph CSV + the JSON that drives the visualizations
+├── code/                       # Python data-preparation and network-building scripts
+├── figures/                    # Static screenshots (reserve-surrender overlay + the failed experiments)
+├── _quarto.yml                 # Quarto site config
+├── _custom.scss / _tokens.scss # Shared journal chrome
+├── _paper.scss                 # Paper-page typography and layout
+├── _includes/                  # Topbar, footer, fonts, paper-id banner, shared viz assets
+└── .github/workflows/          # Auto-deploy on push to `main`
 ```
 
-The styling is set up so the rendered paper sits inside the journal's branded chrome (topbar / footer / typography). You don't need to touch any of the SCSS or include files; just edit `index.qmd`.
-
-## What we're looking for
-
-Work at the intersection of history, computation, and critical approaches to political economy, empire, and environment. Method and interpretation should be inseparable: make your evidentiary chain explicit. We publish in four formats — draft papers, dataset papers, method notes, and short pieces. Full scope and "what falls outside" on the [submission page](https://working-papers-in-critical-search.github.io/home/submit.html).
-
-## Compute and data
-
-We welcome work at any scale — laptop, single GPU, cluster with weeks of runtime. Be clear about what you used so readers can calibrate. The point is transparency about the analytical chain from source to claim, not one-click reproducibility.
-
-For data: small files (`< 10 MB`) live in `data/`; larger goes on Zenodo, Hugging Face, or another DOI repository, with a link from the paper.
+The interactive maps are also published as standalone full-screen pages at
+[jjax07.github.io/Sask_Railway_Visualizations](https://jjax07.github.io/Sask_Railway_Visualizations/),
+and their source lives in the
+[Sask_Railway_Visualizations repository](https://github.com/jjax07/Sask_Railway_Visualizations).
 
 ## Preview locally
 
@@ -44,12 +49,11 @@ quarto preview   # local server with live reload
 quarto render    # build static site to _site/
 ```
 
-You'll need [Quarto](https://quarto.org/docs/get-started/) installed.
-
 ## License
 
-Content: CC-BY 4.0. Code: MIT unless you specify otherwise.
+Content: CC-BY 4.0. Code: MIT unless otherwise specified.
 
 ## Questions
 
-[Open an issue on the main site repo](https://github.com/Working-Papers-in-Critical-Search/home/issues) or email the editors: <jim.clifford@usask.ca> / <jo.guldi@emory.edu>.
+[Open an issue on the main site repo](https://github.com/Working-Papers-in-Critical-Search/home/issues)
+or email the editors: <jim.clifford@usask.ca> / <jo.guldi@emory.edu>.

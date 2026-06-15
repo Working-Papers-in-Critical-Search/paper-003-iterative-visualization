@@ -1,16 +1,20 @@
 project:
   type: website
   output-dir: _site
+  render:
+    - index.qmd
+  resources:
+    # JSON consumed by the embedded visualizations via fetch() — Quarto can't
+    # detect these automatically, so they must be declared to be copied to _site.
+    - data/
 
 website:
   title: "Working Papers in Critical Search"
-  site-url: https://working-papers-in-critical-search.github.io/
+  site-url: https://working-papers-in-critical-search.github.io/paper-003-iterative-visualization/
   open-graph: true
   twitter-card: true
   # No Quarto navbar / page-footer — chrome injected via includes below
   # to match the journal home site.
-  # NOTE for new papers: override site-url with the per-paper URL,
-  # e.g. https://working-papers-in-critical-search.github.io/paper-NNN-slug/
 
 format:
   html:
@@ -28,14 +32,14 @@ format:
     link-external-newwindow: true
     include-in-header:
       - _includes/fonts.html
-      # When cloning this template for a new paper, update the three URLs below
-      # to match the paper's deployed subpath (must match site-url above).
+      - _includes/viz-head.html
       - text: |
-          <link rel="canonical" href="https://working-papers-in-critical-search.github.io/paper-NNN-slug/">
-          <meta property="og:url" content="https://working-papers-in-critical-search.github.io/paper-NNN-slug/">
-          <meta name="twitter:url" content="https://working-papers-in-critical-search.github.io/paper-NNN-slug/">
+          <link rel="canonical" href="https://working-papers-in-critical-search.github.io/paper-003-iterative-visualization/">
+          <meta property="og:url" content="https://working-papers-in-critical-search.github.io/paper-003-iterative-visualization/">
+          <meta name="twitter:url" content="https://working-papers-in-critical-search.github.io/paper-003-iterative-visualization/">
     include-before-body:
       - _includes/topbar.html
+      - _includes/paper-id.html
     include-after-body:
       - _includes/footer.html
       - _includes/mobile-toc.html

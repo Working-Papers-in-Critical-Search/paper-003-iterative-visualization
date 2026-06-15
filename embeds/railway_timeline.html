@@ -1,0 +1,396 @@
+<figure class="wpcs-viz">
+<div class="wpcs-viz__frame" id="viz-timeline">
+  <div class="wpcs-viz__loading">Loading the railway network timeline…</div>
+  <style>
+    /* ── Scoped: every rule lives under #viz-timeline ───────────────────────── */
+    #viz-timeline { height: 100%; display: flex; flex-direction: column;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #000; color: #eee; }
+    #viz-timeline * { box-sizing: border-box; }
+    #viz-timeline .header {
+      background: #1a1a1e; padding: 9px 16px; border-bottom: 3px solid #0b6a41; z-index: 10; }
+    #viz-timeline .header h2 { color: #fff; font-size: 0.98em; margin: 0; }
+    #viz-timeline .header p { color: #9A9B9D; font-size: 11px; margin: 2px 0 0; }
+    #viz-timeline .main-container { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+    #viz-timeline .map-container { flex: 1; min-height: 0; display: flex; }
+    #viz-timeline #timeline-map { flex: 1; height: 100%; }
+    #viz-timeline .sidebar { width: 280px; background: #1a1a1e; padding: 15px; overflow-y: auto; }
+    #viz-timeline .controls { margin-bottom: 10px; }
+    #viz-timeline .year-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    #viz-timeline .year-row label { color: #f1c730; font-size: 13px; font-weight: bold; }
+    #viz-timeline .year-row input[type="range"] { flex: 1; margin: 0; }
+    #viz-timeline .year-display { font-size: 16px; font-weight: bold; color: #f1c730; min-width: 35px; }
+    #viz-timeline input[type="range"] {
+      width: 100%; margin: 10px 0; -webkit-appearance: none;
+      height: 6px; border-radius: 3px; background: #4D4E53; }
+    #viz-timeline input[type="range"]::-webkit-slider-runnable-track {
+      height: 6px; background: transparent; border-radius: 3px; }
+    #viz-timeline input[type="range"]::-moz-range-track {
+      height: 6px; background: #4D4E53; border-radius: 3px; }
+    #viz-timeline input[type="range"]::-moz-range-progress {
+      height: 6px; background: #f1c730; border-radius: 3px 0 0 3px; }
+    #viz-timeline input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 16px; height: 16px; background: #fff;
+      border-radius: 50%; margin-top: -5px; cursor: pointer; }
+    #viz-timeline input[type="range"]::-moz-range-thumb {
+      width: 16px; height: 16px; background: #fff; border-radius: 50%;
+      border: none; cursor: pointer; }
+    #viz-timeline .play-controls { display: flex; justify-content: center; gap: 8px; margin-bottom: 8px; }
+    #viz-timeline .play-controls button {
+      background: #0b6a41; color: #fff; border: none; padding: 8px 16px;
+      border-radius: 5px; cursor: pointer; font-size: 13px; }
+    #viz-timeline .play-controls button:hover { background: #0d8550; }
+    #viz-timeline .legend { background: #252528; padding: 10px 12px; border-radius: 5px; margin-top: 10px; }
+    #viz-timeline .legend h3 {
+      color: #f1c730; margin-bottom: 8px; border-bottom: 1px solid #0b6a41;
+      padding-bottom: 5px; font-size: 13px; }
+    #viz-timeline .legend-item {
+      display: flex; align-items: center; margin: 5px 0; cursor: pointer;
+      padding: 4px; border-radius: 3px; transition: background 0.2s; font-size: 12px; }
+    #viz-timeline .legend-item:hover { background: #000; }
+    #viz-timeline .legend-item.inactive { opacity: 0.4; }
+    #viz-timeline .legend-circle {
+      width: 14px; height: 14px; border-radius: 50%; margin-right: 8px; border: 2px solid #fff; }
+    #viz-timeline .legend-count {
+      margin-left: auto; background: #000; padding: 2px 6px; border-radius: 10px; font-size: 11px; }
+    #viz-timeline .stats { background: #252528; padding: 10px 12px; border-radius: 5px; margin-top: 10px; }
+    #viz-timeline .stats h3 {
+      color: #f1c730; margin-bottom: 8px; border-bottom: 1px solid #0b6a41;
+      padding-bottom: 5px; font-size: 13px; }
+    #viz-timeline .stat-item {
+      display: flex; justify-content: space-between; padding: 4px 0;
+      border-bottom: 1px solid #000; font-size: 12px; }
+    #viz-timeline .chart-container {
+      height: 150px; background: #1a1a1e; padding: 10px 15px; border-top: 1px solid #252528; }
+    #viz-timeline .chart {
+      display: flex; align-items: flex-end; justify-content: space-around;
+      height: 110px; padding: 0 10px; }
+    #viz-timeline .chart-bar-container {
+      display: flex; flex-direction: column; align-items: center; flex: 1; max-width: 50px; }
+    #viz-timeline .chart-bar {
+      width: 30px; background: linear-gradient(to top, #0b6a41, #0d8550);
+      border-radius: 3px 3px 0 0; transition: height 0.5s ease; position: relative; }
+    #viz-timeline .chart-bar.highlighted { background: linear-gradient(to top, #f1c730, #ffdd55); }
+    #viz-timeline .chart-bar .count {
+      position: absolute; top: -16px; left: 50%; transform: translateX(-50%);
+      font-size: 10px; color: #fff; }
+    #viz-timeline .chart-label { margin-top: 3px; font-size: 10px; color: #9A9B9D; }
+    #viz-timeline .info-box { background: #252528; padding: 10px 12px; border-radius: 5px; margin-top: 10px; }
+    #viz-timeline .info-box h3 { color: #f1c730; margin-bottom: 8px; font-size: 13px; }
+    #viz-timeline .info-box p { font-size: 11px; color: #9A9B9D; line-height: 1.4; }
+  </style>
+
+  <div class="header">
+    <h2>Saskatchewan Railway Network Timeline</h2>
+    <p>Railway companies expanding across the province, 1882–1920. Click a railway in the legend to show or hide it.</p>
+  </div>
+
+  <div class="main-container">
+    <div class="map-container">
+      <div id="timeline-map"></div>
+      <div class="sidebar">
+        <div class="controls">
+          <div class="year-row">
+            <label>Year:</label>
+            <span class="year-display" id="timeline-yearDisplay">1882</span>
+            <input type="range" id="timeline-yearSlider" min="1882" max="1920" step="1" value="1882">
+          </div>
+          <div class="play-controls">
+            <button id="timeline-playBtn">Play</button>
+            <button id="timeline-resetBtn">Reset</button>
+          </div>
+        </div>
+
+        <div class="legend">
+          <h3>Railway Companies</h3>
+          <div class="legend-item" data-railway="CPR">
+            <div class="legend-circle" style="background: #c75d38;"></div>
+            <span>CPR (Canadian Pacific)</span>
+            <span class="legend-count" id="timeline-count-CPR">0</span>
+          </div>
+          <div class="legend-item" data-railway="QLSRSC">
+            <div class="legend-circle" style="background: #0b6a41;"></div>
+            <span>QLSRSC</span>
+            <span class="legend-count" id="timeline-count-QLSRSC">0</span>
+          </div>
+          <div class="legend-item" data-railway="CNoR">
+            <div class="legend-circle" style="background: #f1c730;"></div>
+            <span>CNoR (Canadian Northern)</span>
+            <span class="legend-count" id="timeline-count-CNoR">0</span>
+          </div>
+          <div class="legend-item" data-railway="GTPR">
+            <div class="legend-circle" style="background: #6c5ce7;"></div>
+            <span>GTPR (Grand Trunk Pacific)</span>
+            <span class="legend-count" id="timeline-count-GTPR">0</span>
+          </div>
+          <div class="legend-item" data-railway="Other">
+            <div class="legend-circle" style="background: #9A9B9D;"></div>
+            <span>Other Railways</span>
+            <span class="legend-count" id="timeline-count-Other">0</span>
+          </div>
+        </div>
+
+        <div class="stats">
+          <h3>Statistics</h3>
+          <div class="stat-item">
+            <span>Total Settlements:</span>
+            <span id="timeline-totalSettlements">0</span>
+          </div>
+          <div class="stat-item">
+            <span>With Railway:</span>
+            <span id="timeline-withRailway">0</span>
+          </div>
+        </div>
+
+        <div class="info-box">
+          <h3>About the Railways</h3>
+          <p id="timeline-railwayInfo">
+            <b>CPR (1882+):</b> First transcontinental through southern SK.<br><br>
+            <b>QLSRSC (1889-90):</b> Regina to Prince Albert via Saskatoon.<br><br>
+            <b>CNoR (1899+):</b> Northerly competitor through Saskatoon.<br><br>
+            <b>GTPR (1905+):</b> Third transcontinental via Saskatoon.
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="chart-container">
+      <div class="chart" id="timeline-yearChart"></div>
+    </div>
+  </div>
+</div>
+<figcaption><span class="wpcs-fignum">Figure&nbsp;4.</span> Railway network timeline — a year-by-year animation of the province-wide railway network, 1882–1920, with a bar chart of settlements added each year. Press play, or drag the year slider. <a class="wpcs-viz__full" href="https://jjax07.github.io/Sask_Railway_Visualizations/railway_timeline.html" target="_blank" rel="noopener">Open full-screen&nbsp;↗</a></figcaption>
+</figure>
+
+<script>
+(function () {
+  var root = document.getElementById('viz-timeline');
+  if (!root || root.dataset.init) return;
+
+  function init() {
+    if (root.dataset.init) return;
+    root.dataset.init = '1';
+
+    var data = null;
+    var map = null;
+    var markers = {};
+    var visibleRailways = { CPR: true, QLSRSC: true, CNoR: true, GTPR: true, Other: true };
+    var isPlaying = false;
+    var playInterval = null;
+
+    var railwayColors = {
+      CPR: '#c75d38',
+      QLSRSC: '#0b6a41',
+      CNoR: '#f1c730',
+      GTPR: '#6c5ce7',
+      Other: '#9A9B9D'
+    };
+
+    function initMap() {
+      map = L.map('timeline-map', { scrollWheelZoom: false }).setView([52.0, -106.0], 6);
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+        subdomains: 'abcd',
+        maxZoom: 19
+      }).addTo(map);
+    }
+
+    function loadData() {
+      fetch('data/railway_timeline.json')
+        .then(function (response) { return response.json(); })
+        .then(function (json) {
+          data = json;
+
+          // Build lookup of all railways per settlement
+          var settlementRailways = {};
+          Object.keys(data).forEach(function (railway) {
+            data[railway].forEach(function (s) {
+              if (!settlementRailways[s.name]) settlementRailways[s.name] = [];
+              settlementRailways[s.name].push({ railway: railway, year: s.year });
+            });
+          });
+          // Sort each settlement's railways by year
+          Object.values(settlementRailways).forEach(function (arr) {
+            arr.sort(function (a, b) { return a.year - b.year; });
+          });
+
+          // Create markers for all settlements
+          Object.keys(data).forEach(function (railway) {
+            markers[railway] = [];
+            data[railway].forEach(function (s) {
+              var marker = L.circleMarker([s.lat, s.lon], {
+                radius: 3,
+                fillColor: railwayColors[railway],
+                color: '#fff',
+                weight: 1,
+                opacity: 0,
+                fillOpacity: 0
+              }).addTo(map);
+
+              var allRailways = settlementRailways[s.name] || [];
+              var first = allRailways[0];
+              var popupHtml = '<b>' + s.name + '</b><br>';
+              popupHtml += '<b>First railway: ' + first.railway + ' (' + first.year + ')</b>';
+              if (allRailways.length > 1) {
+                popupHtml += '<br><br>All railways:';
+                allRailways.forEach(function (r) {
+                  var color = railwayColors[r.railway] || '#9A9B9D';
+                  popupHtml += '<br><span style="color:' + color + '">&#9679;</span> ' + r.railway + ': ' + r.year;
+                });
+              }
+              marker.bindPopup(popupHtml);
+
+              markers[railway].push({ marker: marker, data: s });
+            });
+          });
+
+          // Count total settlements
+          var total = Object.values(data).reduce(function (sum, arr) { return sum + arr.length; }, 0);
+          document.getElementById('timeline-totalSettlements').textContent = total;
+
+          // Build year chart
+          buildYearChart();
+
+          // Start paused at the first year (no auto-play).
+          updateYear(1882);
+
+          root.classList.add('is-ready');
+          setTimeout(function () { map.invalidateSize(); }, 60);
+        })
+        .catch(function (err) {
+          root.querySelector('#timeline-yearChart').innerHTML =
+            '<span style="color:#e57373;font-size:12px;">Failed to load data: ' + err.message + '</span>';
+          root.classList.add('is-ready');
+        });
+    }
+
+    function buildYearChart() {
+      // Count settlements by year
+      var yearCounts = {};
+      for (var y = 1882; y <= 1920; y++) yearCounts[y] = 0;
+
+      Object.values(data).flat().forEach(function (s) {
+        if (s.year >= 1882 && s.year <= 1920) yearCounts[s.year]++;
+      });
+
+      var maxCount = Math.max.apply(null, Object.values(yearCounts));
+      var chartDiv = document.getElementById('timeline-yearChart');
+      chartDiv.innerHTML = '';
+
+      for (var yr = 1882; yr <= 1920; yr++) {
+        var count = yearCounts[yr];
+        var height = maxCount > 0 ? (count / maxCount) * 120 : 0;
+
+        var container = document.createElement('div');
+        container.className = 'chart-bar-container';
+        container.innerHTML =
+          '<div class="chart-bar" data-year="' + yr + '" style="height: ' + height + 'px;">' +
+          (count > 0 ? '<span class="count">' + count + '</span>' : '') +
+          '</div>' +
+          '<span class="chart-label">' + (yr % 5 === 0 || yr === 1882 ? yr : '') + '</span>';
+        chartDiv.appendChild(container);
+      }
+    }
+
+    function updateSliderTrack(slider) {
+      var min = parseInt(slider.min);
+      var max = parseInt(slider.max);
+      var val = parseInt(slider.value);
+      var percent = ((val - min) / (max - min)) * 100;
+      slider.style.background = 'linear-gradient(to right, #f1c730 0%, #f1c730 ' + percent + '%, #4D4E53 ' + percent + '%, #4D4E53 100%)';
+    }
+
+    function updateYear(year) {
+      document.getElementById('timeline-yearDisplay').textContent = year;
+      var slider = document.getElementById('timeline-yearSlider');
+      slider.value = year;
+      updateSliderTrack(slider);
+
+      var counts = { CPR: 0, QLSRSC: 0, CNoR: 0, GTPR: 0, Other: 0 };
+      var totalWithRailway = 0;
+
+      Object.keys(markers).forEach(function (railway) {
+        markers[railway].forEach(function (m) {
+          var isVisible = m.data.year <= year && visibleRailways[railway];
+          if (m.data.year <= year) {
+            counts[railway]++;
+            totalWithRailway++;
+          }
+          m.marker.setStyle({
+            opacity: isVisible ? 1 : 0,
+            fillOpacity: isVisible ? 0.8 : 0
+          });
+        });
+      });
+
+      // Update counts
+      Object.keys(counts).forEach(function (railway) {
+        document.getElementById('timeline-count-' + railway).textContent = counts[railway];
+      });
+      document.getElementById('timeline-withRailway').textContent = totalWithRailway;
+
+      // Highlight current year in chart
+      root.querySelectorAll('.chart-bar').forEach(function (bar) {
+        if (parseInt(bar.dataset.year) === year) bar.classList.add('highlighted');
+        else bar.classList.remove('highlighted');
+      });
+    }
+
+    function toggleRailway(railway) {
+      visibleRailways[railway] = !visibleRailways[railway];
+      var legendItem = root.querySelector('.legend-item[data-railway="' + railway + '"]');
+      legendItem.classList.toggle('inactive', !visibleRailways[railway]);
+      updateYear(parseInt(document.getElementById('timeline-yearSlider').value));
+    }
+
+    function togglePlay() {
+      if (isPlaying) {
+        clearInterval(playInterval);
+        document.getElementById('timeline-playBtn').textContent = 'Play';
+        isPlaying = false;
+      } else {
+        isPlaying = true;
+        document.getElementById('timeline-playBtn').textContent = 'Pause';
+        var year = parseInt(document.getElementById('timeline-yearSlider').value);
+        // If we're at the end, restart from the beginning on play.
+        if (year >= 1920) { year = 1882; updateYear(year); }
+
+        playInterval = setInterval(function () {
+          year++;
+          if (year > 1920) {
+            clearInterval(playInterval);
+            document.getElementById('timeline-playBtn').textContent = 'Play';
+            isPlaying = false;
+            return;
+          }
+          updateYear(year);
+        }, 300);
+      }
+    }
+
+    function reset() {
+      if (isPlaying) togglePlay();
+      updateYear(1882);
+    }
+
+    initMap();
+    loadData();
+
+    document.getElementById('timeline-yearSlider').addEventListener('input', function (e) {
+      updateYear(parseInt(e.target.value));
+    });
+    document.getElementById('timeline-playBtn').addEventListener('click', togglePlay);
+    document.getElementById('timeline-resetBtn').addEventListener('click', reset);
+
+    root.querySelectorAll('.legend-item').forEach(function (item) {
+      item.addEventListener('click', function () {
+        toggleRailway(item.dataset.railway);
+      });
+    });
+  }
+
+  var io = new IntersectionObserver(function (entries, obs) {
+    entries.forEach(function (e) { if (e.isIntersecting) { init(); obs.disconnect(); } });
+  }, { rootMargin: '300px' });
+  io.observe(root);
+})();
+</script>

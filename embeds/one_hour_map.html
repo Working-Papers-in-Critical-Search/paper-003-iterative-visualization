@@ -1,0 +1,803 @@
+<figure class="wpcs-viz">
+<div class="wpcs-viz__frame" id="viz-onehour">
+  <div class="wpcs-viz__loading">Loading the One Hour Railway Corridor map…</div>
+  <style>
+    /* ── Scoped: every rule lives under #viz-onehour ───────────────────────── */
+    #viz-onehour { height: 100%; display: flex; flex-direction: column;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #000; color: #eee; }
+    #viz-onehour * { box-sizing: border-box; }
+    #viz-onehour .oh-header {
+      background: #1a1a1e; padding: 9px 16px; border-bottom: 3px solid #0b6a41; z-index: 10; }
+    #viz-onehour .oh-header h2 { color: #fff; font-size: 0.98em; margin: 0; }
+    #viz-onehour .oh-header p { color: #9A9B9D; font-size: 11px; margin: 2px 0 0; }
+    #viz-onehour .oh-container { display: flex; flex: 1; min-height: 0; }
+    #viz-onehour .oh-map { flex: 1; height: 100%; }
+    #viz-onehour .oh-sidebar {
+      width: 320px; background: #1a1a1e; padding: 16px; overflow-y: auto;
+      border-left: 1px solid #252528; }
+    #viz-onehour .oh-controls { margin-bottom: 10px; }
+    #viz-onehour .oh-year-row {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    #viz-onehour .oh-year-row label {
+      color: #f1c730; font-size: 13px; font-weight: bold; }
+    #viz-onehour .oh-year-row input[type="range"] { flex: 1; margin: 0; }
+    #viz-onehour .oh-year-display {
+      font-size: 16px; font-weight: bold; color: #f1c730; min-width: 35px; }
+    #viz-onehour input[type="range"] {
+      width: 100%; margin: 10px 0; -webkit-appearance: none; appearance: none;
+      height: 6px; border-radius: 3px; background: #4D4E53; }
+    #viz-onehour input[type="range"]::-webkit-slider-runnable-track {
+      height: 6px; background: transparent; border-radius: 3px; }
+    #viz-onehour input[type="range"]::-moz-range-track {
+      height: 6px; background: #4D4E53; border-radius: 3px; }
+    #viz-onehour input[type="range"]::-moz-range-progress {
+      height: 6px; background: #f1c730; border-radius: 3px 0 0 3px; }
+    #viz-onehour input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none; width: 16px; height: 16px;
+      background: #fff; border-radius: 50%; margin-top: -5px; cursor: pointer; }
+    #viz-onehour input[type="range"]::-moz-range-thumb {
+      width: 16px; height: 16px; background: #fff; border-radius: 50%;
+      border: none; cursor: pointer; }
+    #viz-onehour .oh-stats {
+      background: #252528; padding: 10px 12px; border-radius: 5px; margin-top: 10px; }
+    #viz-onehour .oh-stats h3 {
+      color: #f1c730; margin: 0 0 8px; border-bottom: 1px solid #0b6a41;
+      padding-bottom: 5px; font-size: 13px; }
+    #viz-onehour .oh-stat-item {
+      display: flex; justify-content: space-between; padding: 4px 0;
+      border-bottom: 1px solid #000; font-size: 12px; }
+    #viz-onehour .oh-settlement-list { margin-top: 10px; }
+    #viz-onehour .oh-settlement-list h3 {
+      color: #f1c730; margin: 0 0 8px; font-size: 13px; }
+    #viz-onehour .oh-settlement-item {
+      background: #252528; padding: 8px; margin: 4px 0; border-radius: 3px;
+      border-left: 3px solid #0b6a41; }
+    #viz-onehour .oh-settlement-item .oh-name { font-weight: bold; font-size: 13px; }
+    #viz-onehour .oh-settlement-item .oh-details {
+      font-size: 11px; color: #aaa; margin-top: 3px; }
+    #viz-onehour .oh-legend {
+      background: #252528; padding: 10px 12px; border-radius: 5px; margin-top: 10px; }
+    #viz-onehour .oh-legend h3 { color: #f1c730; margin: 0 0 8px; font-size: 13px; }
+    #viz-onehour .oh-legend-item {
+      display: flex; align-items: center; margin: 4px 0; font-size: 12px; }
+    #viz-onehour .oh-legend-circle {
+      width: 16px; height: 16px; border-radius: 50%; margin-right: 8px; flex-shrink: 0; }
+    #viz-onehour .oh-play-controls {
+      display: flex; justify-content: center; gap: 8px; margin-bottom: 8px; }
+    #viz-onehour .oh-play-controls button {
+      background: #0b6a41; color: #fff; border: none; padding: 8px 16px;
+      border-radius: 5px; cursor: pointer; font-size: 13px; }
+    #viz-onehour .oh-play-controls button:hover { background: #0d8550; }
+  </style>
+
+  <div class="oh-header">
+    <h2>One-Hour Railway Corridor from Saskatoon</h2>
+    <p>Settlements reachable within one hour by train (40&nbsp;km at 40&nbsp;km/h) as the network expanded, 1890–1920.</p>
+  </div>
+
+  <div class="oh-container">
+    <div class="oh-map" id="onehour-map"></div>
+    <div class="oh-sidebar">
+      <div class="oh-controls">
+        <div class="oh-year-row">
+          <label>Year:</label>
+          <span class="oh-year-display" id="onehour-yearDisplay">1890</span>
+          <input type="range" id="onehour-yearSlider" min="1890" max="1920" step="5" value="1890">
+        </div>
+        <div class="oh-play-controls">
+          <button id="onehour-playBtn">Play</button>
+          <button id="onehour-resetBtn">Reset</button>
+        </div>
+      </div>
+
+      <div class="oh-stats">
+        <h3>Statistics</h3>
+        <div class="oh-stat-item">
+          <span>Connected Settlements:</span>
+          <span id="onehour-connectedCount">0</span>
+        </div>
+        <div class="oh-stat-item">
+          <span>Total in Range:</span>
+          <span id="onehour-totalCount">0</span>
+        </div>
+      </div>
+
+      <div class="oh-legend">
+        <h3>Legend</h3>
+        <div class="oh-legend-item">
+          <div class="oh-legend-circle" style="background: #0b6a41;"></div>
+          <span>Saskatoon</span>
+        </div>
+        <div class="oh-legend-item">
+          <div class="oh-legend-circle" style="background: #f1c730;"></div>
+          <span>Connected Settlement</span>
+        </div>
+        <div class="oh-legend-item">
+          <div class="oh-legend-circle" style="background: #9A9B9D; opacity: 0.5;"></div>
+          <span>Not Yet Connected</span>
+        </div>
+        <div class="oh-legend-item">
+          <div class="oh-legend-circle" style="background: transparent; border: 2px dashed #0b6a41;"></div>
+          <span>40 km Radius (1 hour)</span>
+        </div>
+        <div class="oh-legend-item">
+          <div style="width: 20px; height: 3px; background: #f1c730; margin-right: 8px; flex-shrink: 0;"></div>
+          <span>Railway Route</span>
+        </div>
+      </div>
+
+      <div class="oh-settlement-list">
+        <h3>Settlements Within 1 Hour</h3>
+        <div id="onehour-settlementList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<figcaption><span class="wpcs-fignum">Figure&nbsp;1.</span> One Hour Railway Corridor — how far a traveller could reach by rail in roughly one hour from any given settlement. Click a settlement to recompute its corridor; use the year control to step through the network's growth. <a class="wpcs-viz__full" href="https://jjax07.github.io/Sask_Railway_Visualizations/one_hour_map.html" target="_blank" rel="noopener">Open full-screen&nbsp;↗</a></figcaption>
+</figure>
+
+<script>
+(function () {
+  var root = document.getElementById('viz-onehour');
+  if (!root || root.dataset.init) return;
+
+  function init() {
+    if (root.dataset.init) return;
+    root.dataset.init = '1';
+
+    var data = null;
+    var trackData = null;         // Railway track geometry
+    var networkData = null;       // Railway network (nodes/edges)
+    var mappingData = null;       // Settlement to node mappings
+    var map = null;
+    var markers = {};
+    var connectionLines = [];     // Railway route lines
+    var radiusCircle = null;
+    var isPlaying = false;
+    var playInterval = null;
+
+    // Initialize map
+    function initMap() {
+      map = L.map('onehour-map', { scrollWheelZoom: false }).setView([52.12, -106.67], 9);
+
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+        subdomains: 'abcd',
+        maxZoom: 19
+      }).addTo(map);
+    }
+
+    // Calculate distance between two lat/lon points in meters (Haversine)
+    function haversineDistance(lat1, lon1, lat2, lon2) {
+      var R = 6371000; // Earth's radius in meters
+      var dLat = (lat2 - lat1) * Math.PI / 180;
+      var dLon = (lon2 - lon1) * Math.PI / 180;
+      var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+      var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return R * c;
+    }
+
+    // Find intersection point of line segment with circle boundary
+    function findCircleIntersection(pt1, pt2, centerLat, centerLon, radiusM) {
+      var dist1 = haversineDistance(centerLat, centerLon, pt1[0], pt1[1]);
+      var lo = 0, hi = 1;
+      for (var iter = 0; iter < 20; iter++) {
+        var mid = (lo + hi) / 2;
+        var lat = pt1[0] + (pt2[0] - pt1[0]) * mid;
+        var lon = pt1[1] + (pt2[1] - pt1[1]) * mid;
+        var dist = haversineDistance(centerLat, centerLon, lat, lon);
+        if (dist < radiusM) {
+          if (dist1 < radiusM) lo = mid;
+          else hi = mid;
+        } else {
+          if (dist1 < radiusM) hi = mid;
+          else lo = mid;
+        }
+      }
+      var t = (lo + hi) / 2;
+      return [pt1[0] + (pt2[0] - pt1[0]) * t, pt1[1] + (pt2[1] - pt1[1]) * t];
+    }
+
+    // Clip a polyline to stay within a circle
+    function clipPolylineToCircle(coords, centerLat, centerLon, radiusM) {
+      if (!coords || coords.length < 2) return coords;
+      var clipped = [];
+      for (var i = 0; i < coords.length; i++) {
+        var pt = coords[i];
+        var dist = haversineDistance(centerLat, centerLon, pt[0], pt[1]);
+        var isInside = dist <= radiusM;
+        if (i === 0) {
+          if (isInside) clipped.push(pt);
+        } else {
+          var prevPt = coords[i - 1];
+          var prevDist = haversineDistance(centerLat, centerLon, prevPt[0], prevPt[1]);
+          var prevInside = prevDist <= radiusM;
+          if (isInside && prevInside) {
+            clipped.push(pt);
+          } else if (isInside && !prevInside) {
+            clipped.push(findCircleIntersection(prevPt, pt, centerLat, centerLon, radiusM));
+            clipped.push(pt);
+          } else if (!isInside && prevInside) {
+            clipped.push(findCircleIntersection(prevPt, pt, centerLat, centerLon, radiusM));
+          }
+        }
+      }
+      return clipped.length >= 2 ? clipped : null;
+    }
+
+    // Find shortest path between two nodes using Dijkstra
+    function findPath(startNode, endNode) {
+      if (!networkData || !networkData.adj) return null;
+      if (startNode === endNode) return [startNode];
+      var dist = {}, prev = {}, visited = new Set(), queue = [];
+      dist[startNode] = 0;
+      queue.push({node: startNode, dist: 0});
+      while (queue.length > 0) {
+        queue.sort(function (a, b) { return a.dist - b.dist; });
+        var current = queue.shift().node;
+        if (visited.has(current)) continue;
+        visited.add(current);
+        if (current === endNode) break;
+        var neighbors = networkData.adj[current] || [];
+        for (var n = 0; n < neighbors.length; n++) {
+          var neighbor = neighbors[n].node;
+          var weight = neighbors[n].weight;
+          if (visited.has(neighbor)) continue;
+          var newDist = dist[current] + weight;
+          if (dist[neighbor] === undefined || newDist < dist[neighbor]) {
+            dist[neighbor] = newDist;
+            prev[neighbor] = current;
+            queue.push({node: neighbor, dist: newDist});
+          }
+        }
+      }
+      if (prev[endNode] === undefined && startNode !== endNode) return null;
+      var path = [];
+      var cur = endNode;
+      while (cur !== undefined) {
+        path.unshift(cur);
+        cur = prev[cur];
+      }
+      return path;
+    }
+
+    // Get track geometry for a path
+    function getPathGeometry(path) {
+      if (!path || path.length < 2 || !trackData || !trackData.lookup) return null;
+      var allCoords = [];
+      for (var i = 0; i < path.length - 1; i++) {
+        var key = path[i] + '|' + path[i+1];
+        var track = trackData.lookup[key];
+        if (track && track.coordinates) {
+          var coords = track.coordinates.map(function (c) { return [c[1], c[0]]; });
+          if (allCoords.length > 0) {
+            var lastPoint = allCoords[allCoords.length - 1];
+            var firstPoint = coords[0];
+            var lastPointReversed = coords[coords.length - 1];
+            var distToFirst = Math.abs(lastPoint[0] - firstPoint[0]) + Math.abs(lastPoint[1] - firstPoint[1]);
+            var distToLast = Math.abs(lastPoint[0] - lastPointReversed[0]) + Math.abs(lastPoint[1] - lastPointReversed[1]);
+            if (distToLast < distToFirst) coords = coords.reverse();
+          }
+          allCoords.push.apply(allCoords, coords);
+        }
+      }
+      return allCoords.length > 0 ? allCoords : null;
+    }
+
+    // Find the index of the point on a path closest to a given location
+    function findClosestPointIndex(coords, targetLat, targetLon) {
+      var minDist = Infinity;
+      var minIndex = 0;
+      for (var i = 0; i < coords.length; i++) {
+        var dist = haversineDistance(coords[i][0], coords[i][1], targetLat, targetLon);
+        if (dist < minDist) {
+          minDist = dist;
+          minIndex = i;
+        }
+      }
+      return minIndex;
+    }
+
+    // Trim path to start and end at settlement locations
+    function trimPathToSettlements(coords, fromLat, fromLon, toLat, toLon) {
+      if (!coords || coords.length < 2) return coords;
+      var startIndex = findClosestPointIndex(coords, fromLat, fromLon);
+      var endIndex = findClosestPointIndex(coords, toLat, toLon);
+      var trimmedCoords;
+      if (startIndex <= endIndex) {
+        trimmedCoords = coords.slice(startIndex, endIndex + 1);
+      } else {
+        trimmedCoords = coords.slice(endIndex, startIndex + 1).reverse();
+      }
+      if (trimmedCoords.length >= 2) {
+        trimmedCoords[0] = [fromLat, fromLon];
+        trimmedCoords[trimmedCoords.length - 1] = [toLat, toLon];
+      }
+      return trimmedCoords;
+    }
+
+    // Extend path geometry to include partial edge when settlement is snapped mid-edge
+    function extendPathToEdge(coords, mapping, settlementLat, settlementLon, atEnd) {
+      if (!mapping.snap_nodes || mapping.snap_nodes.length !== 2) return coords;
+
+      var node1 = mapping.snap_nodes[0], node2 = mapping.snap_nodes[1];
+      var edgeKey1 = node1 + '|' + node2;
+      var edgeKey2 = node2 + '|' + node1;
+
+      var track = trackData.lookup[edgeKey1] || trackData.lookup[edgeKey2];
+      if (!track || !track.coordinates) return coords;
+
+      var trackCoords = track.coordinates.map(function (c) { return [c[1], c[0]]; });
+
+      var minDist = Infinity;
+      var closestIdx = 0;
+      for (var i = 0; i < trackCoords.length; i++) {
+        var d = haversineDistance(trackCoords[i][0], trackCoords[i][1], settlementLat, settlementLon);
+        if (d < minDist) {
+          minDist = d;
+          closestIdx = i;
+        }
+      }
+
+      var currentEndpoint = atEnd ? coords[coords.length - 1] : coords[0];
+      var currentDist = haversineDistance(currentEndpoint[0], currentEndpoint[1], settlementLat, settlementLon);
+
+      if (minDist >= currentDist) return coords;
+
+      var pathEndpoint = atEnd ? coords[coords.length - 1] : coords[0];
+      var distToTrackStart = Math.abs(pathEndpoint[0] - trackCoords[0][0]) + Math.abs(pathEndpoint[1] - trackCoords[0][1]);
+      var distToTrackEnd = Math.abs(pathEndpoint[0] - trackCoords[trackCoords.length-1][0]) + Math.abs(pathEndpoint[1] - trackCoords[trackCoords.length-1][1]);
+
+      var extensionCoords;
+      if (distToTrackStart < distToTrackEnd) {
+        extensionCoords = trackCoords.slice(0, closestIdx + 1);
+      } else {
+        extensionCoords = trackCoords.slice(closestIdx).reverse();
+      }
+
+      if (atEnd) {
+        return coords.concat(extensionCoords.slice(1));
+      } else {
+        return extensionCoords.slice(0, -1).concat(coords);
+      }
+    }
+
+    // Check if two arrays of node IDs represent the same edge
+    function isSameEdge(nodes1, nodes2) {
+      if (!nodes1 || !nodes2 || nodes1.length !== 2 || nodes2.length !== 2) return false;
+      return (nodes1[0] === nodes2[0] && nodes1[1] === nodes2[1]) ||
+             (nodes1[0] === nodes2[1] && nodes1[1] === nodes2[0]);
+    }
+
+    // Get geometry for two settlements on the same edge
+    function getSameEdgeGeometry(fromMapping, toMapping, fromLat, fromLon, toLat, toLon) {
+      if (!fromMapping.snap_nodes || !toMapping.snap_nodes) return null;
+      if (fromMapping.snap_nodes.length !== 2 || toMapping.snap_nodes.length !== 2) return null;
+      if (!isSameEdge(fromMapping.snap_nodes, toMapping.snap_nodes)) return null;
+
+      var node1 = fromMapping.snap_nodes[0], node2 = fromMapping.snap_nodes[1];
+      var edgeKey = node1 + '|' + node2;
+      var track = trackData.lookup[edgeKey] || trackData.lookup[node2 + '|' + node1];
+      if (!track || !track.coordinates) return null;
+
+      var trackCoords = track.coordinates.map(function (c) { return [c[1], c[0]]; });
+      var fromIdx = 0, toIdx = 0;
+      var fromMinDist = Infinity, toMinDist = Infinity;
+
+      for (var i = 0; i < trackCoords.length; i++) {
+        var fromDist = haversineDistance(trackCoords[i][0], trackCoords[i][1], fromLat, fromLon);
+        var toDist = haversineDistance(trackCoords[i][0], trackCoords[i][1], toLat, toLon);
+        if (fromDist < fromMinDist) { fromMinDist = fromDist; fromIdx = i; }
+        if (toDist < toMinDist) { toMinDist = toDist; toIdx = i; }
+      }
+
+      var coords;
+      if (fromIdx <= toIdx) {
+        coords = trackCoords.slice(fromIdx, toIdx + 1);
+      } else {
+        coords = trackCoords.slice(toIdx, fromIdx + 1).reverse();
+      }
+
+      // If both settlements project to the same point (sparse track geometry),
+      // create a simple 2-point path through the closest track point
+      if (coords.length < 2) {
+        var trackPoint = trackCoords[fromIdx];
+        return [[fromLat, fromLon], trackPoint, [toLat, toLon]];
+      }
+
+      return coords;
+    }
+
+    // Get geometry for settlements on different edges meeting at a shared node
+    function getSharedNodeGeometry(fromMapping, toMapping, fromLat, fromLon, toLat, toLon) {
+      if (!fromMapping.snap_nodes || !toMapping.snap_nodes) return null;
+      if (fromMapping.snap_nodes.length !== 2 || toMapping.snap_nodes.length !== 2) return null;
+      if (fromMapping.snap_node !== toMapping.snap_node) return null;
+      if (isSameEdge(fromMapping.snap_nodes, toMapping.snap_nodes)) return null;
+
+      var fromNode1 = fromMapping.snap_nodes[0], fromNode2 = fromMapping.snap_nodes[1];
+      var fromTrack = trackData.lookup[fromNode1 + '|' + fromNode2] || trackData.lookup[fromNode2 + '|' + fromNode1];
+      var toNode1 = toMapping.snap_nodes[0], toNode2 = toMapping.snap_nodes[1];
+      var toTrack = trackData.lookup[toNode1 + '|' + toNode2] || trackData.lookup[toNode2 + '|' + toNode1];
+
+      if (!fromTrack || !toTrack || !fromTrack.coordinates || !toTrack.coordinates) return null;
+
+      var fromCoords = fromTrack.coordinates.map(function (c) { return [c[1], c[0]]; });
+      var toCoords = toTrack.coordinates.map(function (c) { return [c[1], c[0]]; });
+
+      var fromIdx = 0, fromMinDist = Infinity;
+      for (var i = 0; i < fromCoords.length; i++) {
+        var d1 = haversineDistance(fromCoords[i][0], fromCoords[i][1], fromLat, fromLon);
+        if (d1 < fromMinDist) { fromMinDist = d1; fromIdx = i; }
+      }
+
+      var toIdx = 0, toMinDist = Infinity;
+      for (var j = 0; j < toCoords.length; j++) {
+        var d2 = haversineDistance(toCoords[j][0], toCoords[j][1], toLat, toLon);
+        if (d2 < toMinDist) { toMinDist = d2; toIdx = j; }
+      }
+
+      // Determine which end of each track is the shared node by checking actual coordinates
+      var sharedNode = fromMapping.snap_node;
+      var sharedNodeData = networkData.nodes.find(function (n) { return n.id === sharedNode; });
+      if (!sharedNodeData) return null;
+
+      var fromStartDist = Math.abs(fromCoords[0][0] - sharedNodeData.lat) + Math.abs(fromCoords[0][1] - sharedNodeData.lon);
+      var fromEndDist = Math.abs(fromCoords[fromCoords.length-1][0] - sharedNodeData.lat) + Math.abs(fromCoords[fromCoords.length-1][1] - sharedNodeData.lon);
+      var fromTrackStartIsShared = fromStartDist < fromEndDist;
+
+      var toStartDist = Math.abs(toCoords[0][0] - sharedNodeData.lat) + Math.abs(toCoords[0][1] - sharedNodeData.lon);
+      var toEndDist = Math.abs(toCoords[toCoords.length-1][0] - sharedNodeData.lat) + Math.abs(toCoords[toCoords.length-1][1] - sharedNodeData.lon);
+      var toTrackStartIsShared = toStartDist < toEndDist;
+
+      var fromPortion = fromTrackStartIsShared
+        ? fromCoords.slice(0, fromIdx + 1).reverse()
+        : fromCoords.slice(fromIdx);
+
+      var toPortion = toTrackStartIsShared
+        ? toCoords.slice(0, toIdx + 1)
+        : toCoords.slice(toIdx).reverse();
+
+      var combined = fromPortion.concat(toPortion.slice(1));
+      return combined.length >= 2 ? combined : null;
+    }
+
+    // Get geometry when one or both settlements are snapped to a node (not an edge)
+    function getNodeOnlyGeometry(fromMapping, toMapping, fromLat, fromLon, toLat, toLon) {
+      if (fromMapping.snap_node !== toMapping.snap_node) return null;
+
+      var fromIsNodeOnly = !fromMapping.snap_nodes || fromMapping.snap_nodes.length === 1;
+      var toIsNodeOnly = !toMapping.snap_nodes || toMapping.snap_nodes.length === 1;
+      if (!fromIsNodeOnly && !toIsNodeOnly) return null;
+
+      var sharedNode = fromMapping.snap_node;
+      var sharedNodeData = networkData.nodes.find(function (n) { return n.id === sharedNode; });
+      if (!sharedNodeData) return null;
+
+      if (fromIsNodeOnly && toIsNodeOnly) {
+        return [[fromLat, fromLon], [sharedNodeData.lat, sharedNodeData.lon], [toLat, toLon]];
+      }
+
+      var edgeMapping = fromIsNodeOnly ? toMapping : fromMapping;
+      var edgeLat = fromIsNodeOnly ? toLat : fromLat;
+      var edgeLon = fromIsNodeOnly ? toLon : fromLon;
+      var nodeLat = fromIsNodeOnly ? fromLat : toLat;
+      var nodeLon = fromIsNodeOnly ? fromLon : toLon;
+
+      var node1 = edgeMapping.snap_nodes[0], node2 = edgeMapping.snap_nodes[1];
+      var track = trackData.lookup[node1 + '|' + node2] || trackData.lookup[node2 + '|' + node1];
+
+      if (!track || !track.coordinates) {
+        return [[fromLat, fromLon], [sharedNodeData.lat, sharedNodeData.lon], [toLat, toLon]];
+      }
+
+      var trackCoords = track.coordinates.map(function (c) { return [c[1], c[0]]; });
+      var startDist = Math.abs(trackCoords[0][0] - sharedNodeData.lat) + Math.abs(trackCoords[0][1] - sharedNodeData.lon);
+      var endDist = Math.abs(trackCoords[trackCoords.length-1][0] - sharedNodeData.lat) + Math.abs(trackCoords[trackCoords.length-1][1] - sharedNodeData.lon);
+      var nodeAtStart = startDist < endDist;
+
+      var closestIdx = 0, minDist = Infinity;
+      for (var i = 0; i < trackCoords.length; i++) {
+        var d = haversineDistance(trackCoords[i][0], trackCoords[i][1], edgeLat, edgeLon);
+        if (d < minDist) { minDist = d; closestIdx = i; }
+      }
+
+      var portion = nodeAtStart ? trackCoords.slice(0, closestIdx + 1) : trackCoords.slice(closestIdx).reverse();
+
+      if (fromIsNodeOnly) {
+        return [[nodeLat, nodeLon]].concat(portion.slice(1));
+      } else {
+        return portion.slice(0, -1).reverse().concat([[nodeLat, nodeLon]]);
+      }
+    }
+
+    // Draw railway connection from Saskatoon to a settlement
+    function drawRailwayConnection(settlementName, color, weight, opacity) {
+      if (!mappingData || !mappingData.lookup) return null;
+      var saskatoonMapping = mappingData.lookup['Saskatoon'];
+      var toMapping = mappingData.lookup[settlementName];
+      if (!saskatoonMapping || !toMapping) return null;
+
+      var settlement = data.settlements.find(function (s) { return s.name === settlementName; });
+      if (!settlement) return null;
+
+      var fromNode = saskatoonMapping.snap_node;
+      var toNode = toMapping.snap_node;
+
+      var coords = null;
+
+      // Case 1: Both settlements on the same snap_node
+      if (fromNode === toNode) {
+        coords = getSameEdgeGeometry(saskatoonMapping, toMapping, data.saskatoon.lat, data.saskatoon.lon, settlement.lat, settlement.lon);
+        if (!coords) {
+          coords = getSharedNodeGeometry(saskatoonMapping, toMapping, data.saskatoon.lat, data.saskatoon.lon, settlement.lat, settlement.lon);
+        }
+        if (!coords) {
+          coords = getNodeOnlyGeometry(saskatoonMapping, toMapping, data.saskatoon.lat, data.saskatoon.lon, settlement.lat, settlement.lon);
+        }
+      }
+
+      // Case 2: Different nodes - use pathfinding
+      if (!coords) {
+        var path = findPath(fromNode, toNode);
+        if (!path) return null;
+
+        coords = getPathGeometry(path);
+        if (coords && coords.length >= 2) {
+          coords = extendPathToEdge(coords, saskatoonMapping, data.saskatoon.lat, data.saskatoon.lon, false);
+          coords = extendPathToEdge(coords, toMapping, settlement.lat, settlement.lon, true);
+        }
+      }
+
+      if (!coords || coords.length < 2) return null;
+
+      coords = trimPathToSettlements(coords, data.saskatoon.lat, data.saskatoon.lon, settlement.lat, settlement.lon);
+      if (!coords || coords.length < 2) return null;
+
+      return L.polyline(coords, { color: color, weight: weight, opacity: opacity });
+    }
+
+    // Load data and initialize
+    function loadData() {
+      return fetch('data/one_hour_corridor.json').then(function (response) {
+        return response.json();
+      }).then(function (corridor) {
+        data = corridor;
+
+        // Load railway track geometry
+        return fetch('data/railway_tracks.json').then(function (trackResponse) {
+          if (trackResponse.ok) {
+            return trackResponse.json().then(function (td) {
+              trackData = td;
+              trackData.lookup = {};
+              trackData.tracks.forEach(function (t) {
+                trackData.lookup[t.source + '|' + t.target] = t;
+                trackData.lookup[t.target + '|' + t.source] = t;
+              });
+            });
+          }
+        }).catch(function (e) { console.warn('Could not load track geometry:', e); });
+      }).then(function () {
+        // Load network graph for pathfinding
+        return fetch('data/railway_network.json').then(function (networkResponse) {
+          if (networkResponse.ok) {
+            return networkResponse.json().then(function (nd) {
+              networkData = nd;
+              networkData.adj = {};
+              networkData.edges.forEach(function (e) {
+                if (!networkData.adj[e.source]) networkData.adj[e.source] = [];
+                if (!networkData.adj[e.target]) networkData.adj[e.target] = [];
+                networkData.adj[e.source].push({node: e.target, weight: e.length_m});
+                networkData.adj[e.target].push({node: e.source, weight: e.length_m});
+              });
+            });
+          }
+        }).catch(function (e) { console.warn('Could not load network:', e); });
+      }).then(function () {
+        // Load settlement to node mappings
+        return fetch('data/settlement_network_mapping.json').then(function (mappingResponse) {
+          if (mappingResponse.ok) {
+            return mappingResponse.json().then(function (md) {
+              mappingData = md;
+              mappingData.lookup = {};
+              mappingData.mappings.forEach(function (m) {
+                mappingData.lookup[m.settlement] = m;
+              });
+            });
+          }
+        }).catch(function (e) { console.warn('Could not load mappings:', e); });
+      }).then(function () {
+        // Add Saskatoon marker
+        var saskatoonIcon = L.divIcon({
+          className: 'custom-marker',
+          html: '<div style="background:#0b6a41; width:20px; height:20px; border-radius:50%; border:3px solid white;"></div>',
+          iconSize: [20, 20],
+          iconAnchor: [10, 10]
+        });
+
+        L.marker([data.saskatoon.lat, data.saskatoon.lon], {icon: saskatoonIcon})
+          .addTo(map)
+          .bindPopup('<b>Saskatoon</b><br>First railway: 1890 (QLSRSC)');
+
+        // Add 40km radius circle
+        radiusCircle = L.circle([data.saskatoon.lat, data.saskatoon.lon], {
+          radius: 40000,
+          color: '#0b6a41',
+          fillColor: '#0b6a41',
+          fillOpacity: 0.1,
+          dashArray: '10, 10',
+          weight: 2
+        }).addTo(map);
+
+        // Add settlement markers
+        data.settlements.forEach(function (s) {
+          var marker = L.circleMarker([s.lat, s.lon], {
+            radius: 8,
+            fillColor: '#9A9B9D',
+            color: '#fff',
+            weight: 1,
+            opacity: 0.5,
+            fillOpacity: 0.5
+          }).addTo(map);
+
+          var railDist = s.railway_distance_km;
+          var distanceDisplay = railDist != null && railDist > 0
+            ? 'Direct: ' + s.distance_km + ' km | By rail: ' + railDist + ' km'
+            : 'Distance: ' + s.distance_km + ' km';
+
+          marker.bindPopup(
+            '<b>' + s.name + '</b><br>' +
+            distanceDisplay + '<br>' +
+            'Railway: ' + (s.first_railway || 'Unknown') + '<br>' +
+            'Railway Arrives: ' + (s.railway_arrives || 'Unknown') + '<br>' +
+            'Connected to Saskatoon: ' + (s.connected_to_saskatoon || 'Unknown')
+          );
+
+          markers[s.name] = {marker: marker, data: s};
+        });
+
+        document.getElementById('onehour-totalCount').textContent = data.settlements.length;
+        updateYear(1890);
+      });
+    }
+
+    // Update slider track progress
+    function updateSliderTrack(slider) {
+      var min = parseInt(slider.min);
+      var max = parseInt(slider.max);
+      var val = parseInt(slider.value);
+      var percent = ((val - min) / (max - min)) * 100;
+      slider.style.background = 'linear-gradient(to right, #f1c730 0%, #f1c730 ' + percent + '%, #4D4E53 ' + percent + '%, #4D4E53 100%)';
+    }
+
+    // Update visualization for selected year
+    function updateYear(year) {
+      document.getElementById('onehour-yearDisplay').textContent = year;
+      var slider = document.getElementById('onehour-yearSlider');
+      slider.value = year;
+      updateSliderTrack(slider);
+
+      // Clear existing connection lines
+      connectionLines.forEach(function (line) { map.removeLayer(line); });
+      connectionLines = [];
+
+      var connectedCount = 0;
+      var listHTML = '';
+
+      var connectedSettlements = [];
+
+      data.settlements.forEach(function (s) {
+        var isConnected = s.connected_to_saskatoon && s.connected_to_saskatoon <= year;
+        var m = markers[s.name];
+
+        if (isConnected) {
+          connectedCount++;
+          connectedSettlements.push(s);
+          m.marker.setStyle({
+            fillColor: '#f1c730',
+            opacity: 1,
+            fillOpacity: 0.9
+          });
+
+          // Draw railway connection line (clipped to 40km)
+          var line = drawRailwayConnection(s.name, '#f1c730', 3, 0.7);
+          if (!line) {
+            // Fallback to straight line if railway path not found
+            line = L.polyline(
+              [[data.saskatoon.lat, data.saskatoon.lon], [s.lat, s.lon]],
+              { color: '#f1c730', weight: 2, opacity: 0.5, dashArray: '5, 5' }
+            );
+          }
+          line.addTo(map);
+          connectionLines.push(line);
+        } else {
+          m.marker.setStyle({
+            fillColor: '#9A9B9D',
+            opacity: 0.5,
+            fillOpacity: 0.5
+          });
+        }
+      });
+
+      // Sort by distance
+      connectedSettlements.sort(function (a, b) { return a.distance_km - b.distance_km; });
+
+      connectedSettlements.forEach(function (s) {
+        var railDist = s.railway_distance_km;
+        var distStr = railDist != null && railDist > 0
+          ? s.distance_km + ' km direct / ' + railDist + ' km by rail'
+          : s.distance_km + ' km';
+        listHTML +=
+          '<div class="oh-settlement-item">' +
+            '<div class="oh-name">' + s.name + '</div>' +
+            '<div class="oh-details">' +
+              distStr + ' | ' + s.first_railway + ' (' + s.railway_arrives + ')' +
+            '</div>' +
+          '</div>';
+      });
+
+      document.getElementById('onehour-connectedCount').textContent = connectedCount;
+      document.getElementById('onehour-settlementList').innerHTML = listHTML || '<p style="color:#9A9B9D;">No settlements connected yet</p>';
+    }
+
+    // Play animation
+    function togglePlay() {
+      if (isPlaying) {
+        clearInterval(playInterval);
+        document.getElementById('onehour-playBtn').textContent = 'Play';
+        isPlaying = false;
+      } else {
+        isPlaying = true;
+        document.getElementById('onehour-playBtn').textContent = 'Pause';
+        var year = parseInt(document.getElementById('onehour-yearSlider').value);
+
+        playInterval = setInterval(function () {
+          year += 5;
+          if (year > 1920) {
+            clearInterval(playInterval);
+            document.getElementById('onehour-playBtn').textContent = 'Play';
+            isPlaying = false;
+            return;
+          }
+          updateYear(year);
+        }, 1500);
+      }
+    }
+
+    // Reset to 1890
+    function reset() {
+      if (isPlaying) {
+        togglePlay();
+      }
+      updateYear(1890);
+    }
+
+    // Bootstrap
+    initMap();
+
+    document.getElementById('onehour-yearSlider').addEventListener('input', function (e) {
+      updateYear(parseInt(e.target.value));
+    });
+    document.getElementById('onehour-playBtn').addEventListener('click', togglePlay);
+    document.getElementById('onehour-resetBtn').addEventListener('click', reset);
+
+    loadData().then(function () {
+      root.classList.add('is-ready');
+      setTimeout(function () { map.invalidateSize(); }, 60);
+    }).catch(function (err) {
+      document.getElementById('onehour-settlementList').innerHTML =
+        '<p style="color:#e57373">Failed to load data: ' + (err && err.message ? err.message : err) + '</p>';
+      root.classList.add('is-ready');
+      setTimeout(function () { if (map) map.invalidateSize(); }, 60);
+    });
+  }
+
+  var io = new IntersectionObserver(function (entries, obs) {
+    entries.forEach(function (e) { if (e.isIntersecting) { init(); obs.disconnect(); } });
+  }, { rootMargin: '300px' });
+  io.observe(root);
+})();
+</script>

@@ -1,0 +1,905 @@
+<figure class="wpcs-viz">
+<div class="wpcs-viz__frame" id="viz-network">
+  <div class="wpcs-viz__loading">Loading the settlement network graph…</div>
+  <style>
+    /* ── Scoped: every rule lives under #viz-network ───────────────────────── */
+    #viz-network { height: 100%; display: flex; flex-direction: column;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #000000; color: #eee; }
+    #viz-network * { box-sizing: border-box; }
+    #viz-network .header {
+      background: #1a1a1e; padding: 9px 16px; text-align: center;
+      border-bottom: 3px solid #0b6a41; }
+    #viz-network .header h2 { color: #ffffff; font-size: 0.98em; margin: 0 0 2px; }
+    #viz-network .header p { color: #9A9B9D; font-size: 11px; margin: 0; }
+    #viz-network .container {
+      display: flex; flex: 1; min-height: 0; }
+    #viz-network .view-container {
+      flex: 1; min-height: 0; position: relative; overflow: hidden; }
+    #viz-network #network-map {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      transition: opacity 0.5s; }
+    #viz-network #network-graph {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      background: #000000; opacity: 0; pointer-events: none;
+      transition: opacity 0.5s; }
+    #viz-network #network-graph.active { opacity: 1; pointer-events: auto; }
+    #viz-network #network-map.hidden { opacity: 0; pointer-events: none; }
+    #viz-network .sidebar {
+      width: 280px; background: #1a1a1e; padding: 15px; overflow-y: auto; }
+    #viz-network .view-toggle { display: flex; gap: 6px; margin-bottom: 10px; }
+    #viz-network .view-toggle button {
+      flex: 1; padding: 8px; border: 2px solid #0b6a41; background: transparent;
+      color: #0b6a41; border-radius: 5px; cursor: pointer; font-size: 11px;
+      transition: all 0.3s; }
+    #viz-network .view-toggle button.active { background: #0b6a41; color: #fff; }
+    #viz-network .view-toggle button:hover:not(.active) { background: rgba(11, 106, 65, 0.2); }
+    #viz-network .controls { margin-bottom: 10px; }
+    #viz-network .year-row {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    #viz-network .year-row label { color: #f1c730; font-size: 13px; font-weight: bold; }
+    #viz-network .year-row input[type="range"] { flex: 1; margin: 0; }
+    #viz-network .year-display {
+      font-size: 16px; font-weight: bold; color: #f1c730; min-width: 35px; }
+    #viz-network input[type="range"] {
+      width: 100%; margin: 10px 0; -webkit-appearance: none; height: 6px;
+      border-radius: 3px; background: #4D4E53; }
+    #viz-network input[type="range"]::-webkit-slider-runnable-track {
+      height: 6px; background: transparent; border-radius: 3px; }
+    #viz-network input[type="range"]::-moz-range-track {
+      height: 6px; background: #4D4E53; border-radius: 3px; }
+    #viz-network input[type="range"]::-moz-range-progress {
+      height: 6px; background: #f1c730; border-radius: 3px 0 0 3px; }
+    #viz-network input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 16px; height: 16px; background: #ffffff;
+      border-radius: 50%; margin-top: -5px; cursor: pointer; }
+    #viz-network input[type="range"]::-moz-range-thumb {
+      width: 16px; height: 16px; background: #ffffff; border-radius: 50%;
+      border: none; cursor: pointer; }
+    #viz-network .play-controls {
+      display: flex; justify-content: center; gap: 8px; margin-bottom: 8px; }
+    #viz-network .play-controls button {
+      background: #0b6a41; color: white; border: none; padding: 8px 16px;
+      border-radius: 5px; cursor: pointer; font-size: 13px; }
+    #viz-network .play-controls button:hover { background: #0d8550; }
+    #viz-network .section {
+      background: #252528; padding: 10px 12px; border-radius: 5px; margin-bottom: 10px; }
+    #viz-network .section h3 {
+      color: #f1c730; margin-bottom: 8px; border-bottom: 1px solid #0b6a41;
+      padding-bottom: 5px; font-size: 13px; }
+    #viz-network .railway-toggles {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+    #viz-network .railway-toggle {
+      display: flex; align-items: center; cursor: pointer; padding: 4px;
+      border-radius: 3px; transition: background 0.2s; }
+    #viz-network .railway-toggle:hover { background: #000000; }
+    #viz-network .railway-toggle.inactive { opacity: 0.4; }
+    #viz-network .railway-toggle input { margin-right: 6px; accent-color: #0b6a41; }
+    #viz-network .railway-color {
+      width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; }
+    #viz-network .railway-toggle span { font-size: 11px; }
+    #viz-network .stats-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    #viz-network .stat-box {
+      background: #000000; padding: 8px; border-radius: 5px; text-align: center; }
+    #viz-network .stat-box .value { font-size: 20px; font-weight: bold; color: #f1c730; }
+    #viz-network .stat-box .label { font-size: 10px; color: #888; margin-top: 2px; }
+    #viz-network .top-hubs { list-style: none; }
+    #viz-network .top-hubs li {
+      display: flex; justify-content: space-between; padding: 4px 0;
+      border-bottom: 1px solid #000000; font-size: 12px; cursor: pointer;
+      transition: background 0.2s; }
+    #viz-network .top-hubs li:hover {
+      background: #000000; margin: 0 -4px; padding: 4px; border-radius: 3px; }
+    #viz-network .top-hubs .name { color: #ccc; }
+    #viz-network .top-hubs .degree { color: #f1c730; font-weight: bold; }
+    #viz-network .legend {
+      margin-top: 10px; padding-top: 8px; border-top: 1px solid #000000; }
+    #viz-network .legend-item {
+      display: flex; align-items: center; font-size: 10px; color: #888; margin: 4px 0; }
+    #viz-network .legend-line {
+      width: 16px; height: 3px; margin-right: 6px; border-radius: 2px; }
+    #viz-network .legend-circle {
+      width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+    #viz-network .legend-diamond {
+      width: 8px; height: 8px; transform: rotate(45deg); margin-right: 6px; }
+    #viz-network .network-explanation {
+      position: absolute; bottom: 20px; left: 20px; background: rgba(26, 26, 30, 0.9);
+      border: 1px solid #0b6a41; border-radius: 5px; padding: 10px 14px;
+      max-width: 360px; font-size: 11px; line-height: 1.5; color: #9A9B9D;
+      opacity: 0; pointer-events: none; transition: opacity 0.5s; z-index: 500; }
+    #viz-network .network-explanation strong { color: #f1c730; }
+    #viz-network .network-explanation.visible { opacity: 1; }
+    /* D3 Graph styles */
+    #viz-network .node { cursor: pointer; transition: r 0.3s; }
+    #viz-network .node:hover { stroke: #fff; stroke-width: 2px; }
+    #viz-network .node-diamond { cursor: pointer; }
+    #viz-network .node-diamond:hover { stroke: #fff; stroke-width: 2px; }
+    #viz-network .link { stroke-opacity: 0.6; transition: stroke-opacity 0.3s; }
+    #viz-network .tooltip {
+      position: absolute; background: #1a1a1e; border: 1px solid #f1c730;
+      padding: 8px 12px; border-radius: 4px; font-size: 12px; pointer-events: none;
+      opacity: 0; transition: opacity 0.2s; z-index: 1000; }
+    /* Leaflet marker styles */
+    #viz-network .diamond-marker { background: transparent !important; border: none !important; }
+    #viz-network .diamond {
+      width: 8px; height: 8px; transform: rotate(45deg);
+      border: 2px solid #888; transition: all 0.2s; }
+  </style>
+
+  <div class="header">
+    <h2>Railway Network Graph</h2>
+    <p>Switch between the geographic view and the force-directed network view of all 429 Saskatchewan settlements.</p>
+  </div>
+
+  <div class="container">
+    <div class="view-container">
+      <div id="network-map"></div>
+      <svg id="network-graph"></svg>
+      <div class="network-explanation" id="network-explanation">
+        <strong>Network Topology View</strong><br>
+        Geography is removed. Settlements are arranged by connectivity alone — linked settlements pull together, forming clusters. Larger nodes are major hubs with many connections. This reveals the structure of the railway network: tightly connected corridors, peripheral endpoints, and central junctions.
+      </div>
+    </div>
+    <div class="sidebar">
+      <div class="view-toggle">
+        <button id="network-geoBtn" class="active">Geographic</button>
+        <button id="network-forceBtn">Network</button>
+      </div>
+
+      <div class="controls">
+        <div class="year-row">
+          <label>Year:</label>
+          <span class="year-display" id="network-yearDisplay">1882</span>
+          <input type="range" id="network-yearSlider" min="1882" max="1920" step="1" value="1882">
+        </div>
+        <div class="play-controls">
+          <button id="network-playBtn">Play</button>
+          <button id="network-resetBtn">Reset</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>RAILWAYS</h3>
+        <div class="railway-toggles">
+          <label class="railway-toggle" data-railway="CPR">
+            <input type="checkbox" checked>
+            <div class="railway-color" style="background: #c75d38;"></div>
+            <span>CPR</span>
+          </label>
+          <label class="railway-toggle" data-railway="QLSRSC">
+            <input type="checkbox" checked>
+            <div class="railway-color" style="background: #0b6a41;"></div>
+            <span>QLSRSC</span>
+          </label>
+          <label class="railway-toggle" data-railway="CNoR">
+            <input type="checkbox" checked>
+            <div class="railway-color" style="background: #f1c730;"></div>
+            <span>CNoR</span>
+          </label>
+          <label class="railway-toggle" data-railway="GTPR">
+            <input type="checkbox" checked>
+            <div class="railway-color" style="background: #6c5ce7;"></div>
+            <span>GTPR</span>
+          </label>
+          <label class="railway-toggle" data-railway="Other">
+            <input type="checkbox" checked>
+            <div class="railway-color" style="background: #888;"></div>
+            <span>Other</span>
+          </label>
+          <label class="railway-toggle" data-railway="Interchange">
+            <input type="checkbox" checked>
+            <div class="railway-color" style="background: #ffffff; border: 1px dashed #888;"></div>
+            <span>Interchange</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>NETWORK STATS</h3>
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="value" id="network-edgeCount">0</div>
+            <div class="label">Edges</div>
+          </div>
+          <div class="stat-box">
+            <div class="value" id="network-densityValue">0%</div>
+            <div class="label">Density</div>
+          </div>
+          <div class="stat-box">
+            <div class="value" id="network-connectedCount">0</div>
+            <div class="label">Connected</div>
+          </div>
+          <div class="stat-box">
+            <div class="value" id="network-isolatedCount">0</div>
+            <div class="label">Isolated</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>TOP HUBS</h3>
+        <ol class="top-hubs" id="network-topHubs">
+          <li><span class="name">Loading...</span></li>
+        </ol>
+      </div>
+
+      <div class="legend">
+        <div class="legend-item">
+          <div class="legend-circle" style="background: #c75d38;"></div>
+          <span>CPR settlement</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-circle" style="background: #0b6a41;"></div>
+          <span>QLSRSC settlement</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-circle" style="background: #f1c730;"></div>
+          <span>CNoR settlement</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-circle" style="background: #6c5ce7;"></div>
+          <span>GTPR settlement</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-line" style="background: transparent; border-top: 2px dashed #ffffff;"></div>
+          <span>Interchange (cross-railway)</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-diamond" style="background: #c75d38;"></div>
+          <span>Multi-railway junction</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-circle" style="background: #666;"></div>
+          <span>Isolated (no railway yet)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="tooltip" id="network-tooltip"></div>
+</div>
+<figcaption><span class="wpcs-fignum">Figure&nbsp;3.</span> Settlement network graph — switch between the geographic view (settlements at their true coordinates) and the force-directed view (settlements positioned by connection density) to surface multi-railway junction nodes such as Nokomis and Biggar. <a class="wpcs-viz__full" href="https://jjax07.github.io/Sask_Railway_Visualizations/network_graph.html" target="_blank" rel="noopener">Open full-screen&nbsp;↗</a></figcaption>
+</figure>
+
+<script>
+(function () {
+  var root = document.getElementById('viz-network');
+  if (!root || root.dataset.init) return;
+
+  function init() {
+    if (root.dataset.init) return;
+    root.dataset.init = '1';
+
+    // Railway colors
+    var railwayColors = {
+      CPR: '#c75d38',
+      QLSRSC: '#0b6a41',
+      CNoR: '#f1c730',
+      GTPR: '#6c5ce7',
+      Interchange: '#ffffff',
+      Other: '#888'
+    };
+
+    // State
+    var data = null;
+    var currentView = 'geo';  // 'geo' or 'force'
+    var visibleRailways = { CPR: true, QLSRSC: true, CNoR: true, GTPR: true, Interchange: true, Other: true };
+    var isPlaying = false;
+    var playInterval = null;
+    var nodeDegrees = {};
+
+    // Leaflet state
+    var map = null;
+    var leafletMarkers = {};
+    var leafletEdges = [];
+
+    // D3 state
+    var svg, d3Nodes = [], d3Links = [];
+    var nodeElements, linkElements;
+    var graphWidth, graphHeight;
+
+    // ==================== INITIALIZATION ====================
+
+    function initLeaflet() {
+      map = L.map('network-map', {
+        center: [52.0, -106.0],
+        zoom: 6,
+        scrollWheelZoom: false
+      });
+
+      // Use CartoDB dark (matches dark theme)
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+        subdomains: 'abcd',
+        maxZoom: 19
+      }).addTo(map);
+
+      setTimeout(function () { map.invalidateSize(); }, 60);
+    }
+
+    function initD3() {
+      svg = d3.select('#network-graph');
+      // Measure container dimensions AFTER the element is visible (init only
+      // fires when the frame intersects the viewport).
+      var container = root.querySelector('.view-container');
+      graphWidth = container.clientWidth;
+      graphHeight = container.clientHeight;
+      svg.attr('width', graphWidth).attr('height', graphHeight);
+
+      // Add zoom behavior
+      var zoom = d3.zoom()
+        .scaleExtent([0.3, 4])
+        .on('zoom', function (event) {
+          svg.select('g').attr('transform', event.transform);
+        });
+      svg.call(zoom);
+
+      // Create main group
+      svg.append('g');
+    }
+
+    // ==================== DATA LOADING ====================
+
+    function loadData() {
+      fetch('data/settlement_connections.json')
+        .then(function (response) { return response.json(); })
+        .then(function (json) {
+          data = json;
+
+          processDataForD3();
+          createLeafletMarkers();
+          createD3Elements();
+          updateVisualization();
+
+          root.classList.add('is-ready');
+          setTimeout(function () { map.invalidateSize(); }, 60);
+        })
+        .catch(function (error) {
+          console.error('Error loading data:', error);
+          root.querySelector('#network-topHubs').innerHTML =
+            '<li><span class="name">Failed to load data: ' + error.message + '</span></li>';
+          root.classList.add('is-ready');
+        });
+    }
+
+    function getFirstRailway(settlement) {
+      if (!settlement.railways || settlement.railways.length === 0) {
+        return 'Other';
+      }
+      var railway = settlement.first_railway;
+      if (!['CPR', 'QLSRSC', 'CNoR', 'GTPR'].includes(railway)) {
+        return 'Other';
+      }
+      return railway;
+    }
+
+    function isMultiRailway(settlement) {
+      return settlement.railways && settlement.railways.length > 1;
+    }
+
+    function processDataForD3() {
+      // Build nodes array
+      d3Nodes = Object.entries(data.settlements).map(function (entry) {
+        var name = entry[0], s = entry[1];
+        return {
+          id: name,
+          lat: s.lat,
+          lon: s.lon,
+          railway_arrives: s.railway_arrives,
+          first_railway: getFirstRailway(s),
+          isMultiRailway: isMultiRailway(s),
+          railways: s.railways,
+          geoX: 0,
+          geoY: 0,
+          forceX: 0,
+          forceY: 0
+        };
+      });
+
+      // Calculate geographic positions for D3 view
+      var lats = d3Nodes.map(function (n) { return n.lat; });
+      var lons = d3Nodes.map(function (n) { return n.lon; });
+      var latExtent = [Math.min.apply(null, lats), Math.max.apply(null, lats)];
+      var lonExtent = [Math.min.apply(null, lons), Math.max.apply(null, lons)];
+      var padding = 60;
+
+      d3Nodes.forEach(function (node) {
+        node.geoX = padding + ((node.lon - lonExtent[0]) / (lonExtent[1] - lonExtent[0])) * (graphWidth - padding * 2);
+        node.geoY = padding + ((latExtent[1] - node.lat) / (latExtent[1] - latExtent[0])) * (graphHeight - padding * 2);
+      });
+
+      // Build links array (unique edges)
+      var linkSet = new Set();
+      d3Links = [];
+      Object.entries(data.connections).forEach(function (entry) {
+        var from = entry[0], connections = entry[1];
+        connections.forEach(function (conn) {
+          if (!conn.connected_year) return;
+          var key = [from, conn.to].sort().join('|');
+          if (linkSet.has(key)) return;
+          linkSet.add(key);
+
+          var railway = conn.shared_railway;
+          if (!['CPR', 'QLSRSC', 'CNoR', 'GTPR', 'Interchange'].includes(railway)) {
+            railway = 'Other';
+          }
+
+          d3Links.push({
+            source: from,
+            target: conn.to,
+            railway: railway,
+            connected_year: conn.connected_year,
+            isInterchange: conn.connection_type === 'interchange'
+          });
+        });
+      });
+
+      // Run force simulation to get force-directed positions
+      var simulation = d3.forceSimulation(d3Nodes)
+        .force('link', d3.forceLink(d3Links).id(function (d) { return d.id; }).distance(25).strength(0.5))
+        .force('charge', d3.forceManyBody().strength(-40))
+        .force('center', d3.forceCenter(graphWidth / 2, graphHeight / 2))
+        .force('collision', d3.forceCollide().radius(6))
+        .stop();
+
+      // Run simulation iterations
+      for (var i = 0; i < 300; i++) simulation.tick();
+
+      // Store force positions
+      d3Nodes.forEach(function (node) {
+        node.forceX = node.x;
+        node.forceY = node.y;
+      });
+    }
+
+    // ==================== LEAFLET MARKERS ====================
+
+    function createLeafletMarkers() {
+      // Create edges first (so they're behind nodes)
+      d3Links.forEach(function (link) {
+        var source = data.settlements[link.source.id || link.source];
+        var target = data.settlements[link.target.id || link.target];
+        if (!source || !target) return;
+
+        var polyline = L.polyline(
+          [[source.lat, source.lon], [target.lat, target.lon]],
+          {
+            color: railwayColors[link.railway],
+            weight: link.isInterchange ? 1.5 : 2,
+            opacity: 0,
+            dashArray: link.isInterchange ? '4,3' : null
+          }
+        ).addTo(map);
+
+        polyline.linkData = link;
+        leafletEdges.push(polyline);
+      });
+
+      // Create node markers
+      Object.entries(data.settlements).forEach(function (entry) {
+        var name = entry[0], settlement = entry[1];
+        var firstRailway = getFirstRailway(settlement);
+        var multiRailway = isMultiRailway(settlement);
+        var color = railwayColors[firstRailway] || '#666';
+        var marker;
+
+        if (multiRailway) {
+          // Diamond marker for multi-railway junctions
+          var diamondIcon = L.divIcon({
+            className: 'diamond-marker',
+            html: '<div class="diamond" style="background: ' + color + '; border-color: #fff;" data-name="' + name + '"></div>',
+            iconSize: [12, 12],
+            iconAnchor: [6, 6]
+          });
+          marker = L.marker([settlement.lat, settlement.lon], { icon: diamondIcon }).addTo(map);
+        } else {
+          marker = L.circleMarker([settlement.lat, settlement.lon], {
+            radius: 4,
+            fillColor: color,
+            color: '#fff',
+            weight: 1,
+            opacity: 0.8,
+            fillOpacity: 0.6
+          }).addTo(map);
+        }
+
+        marker.bindTooltip(name, {
+          permanent: false,
+          direction: 'top',
+          offset: [0, -5]
+        });
+
+        marker.settlementData = {
+          name: name,
+          firstRailway: firstRailway,
+          multiRailway: multiRailway,
+          railway_arrives: settlement.railway_arrives
+        };
+
+        leafletMarkers[name] = marker;
+        nodeDegrees[name] = 0;
+      });
+    }
+
+    // ==================== D3 ELEMENTS ====================
+
+    function createD3Elements() {
+      var g = svg.select('g');
+
+      // Create links
+      linkElements = g.selectAll('.link')
+        .data(d3Links)
+        .enter()
+        .append('line')
+        .attr('class', 'link')
+        .attr('stroke', function (d) { return railwayColors[d.railway]; })
+        .attr('stroke-width', function (d) { return d.isInterchange ? 1.5 : 2; })
+        .attr('stroke-dasharray', function (d) { return d.isInterchange ? '4,3' : null; })
+        .attr('x1', function (d) { return d.source.geoX; })
+        .attr('y1', function (d) { return d.source.geoY; })
+        .attr('x2', function (d) { return d.target.geoX; })
+        .attr('y2', function (d) { return d.target.geoY; });
+
+      // Create circle nodes
+      var circleNodes = d3Nodes.filter(function (d) { return !d.isMultiRailway; });
+      nodeElements = g.selectAll('.node')
+        .data(circleNodes)
+        .enter()
+        .append('circle')
+        .attr('class', 'node')
+        .attr('r', 4)
+        .attr('cx', function (d) { return d.geoX; })
+        .attr('cy', function (d) { return d.geoY; })
+        .attr('fill', function (d) { return railwayColors[d.first_railway] || '#666'; })
+        .on('mouseover', showTooltip)
+        .on('mouseout', hideTooltip);
+
+      // Create diamond nodes for multi-railway
+      var diamondNodes = d3Nodes.filter(function (d) { return d.isMultiRailway; });
+      g.selectAll('.node-diamond')
+        .data(diamondNodes)
+        .enter()
+        .append('rect')
+        .attr('class', 'node-diamond')
+        .attr('width', 10)
+        .attr('height', 10)
+        .attr('x', function (d) { return d.geoX - 5; })
+        .attr('y', function (d) { return d.geoY - 5; })
+        .attr('transform', function (d) { return 'rotate(45, ' + d.geoX + ', ' + d.geoY + ')'; })
+        .attr('fill', function (d) { return railwayColors[d.first_railway] || '#666'; })
+        .on('mouseover', showTooltip)
+        .on('mouseout', hideTooltip);
+    }
+
+    // ==================== VIEW SWITCHING ====================
+
+    function switchView(view) {
+      if (view === currentView) return;
+      currentView = view;
+
+      root.querySelector('#network-geoBtn').classList.toggle('active', view === 'geo');
+      root.querySelector('#network-forceBtn').classList.toggle('active', view === 'force');
+      root.querySelector('#network-map').classList.toggle('hidden', view === 'force');
+      root.querySelector('#network-graph').classList.toggle('active', view === 'force');
+      root.querySelector('#network-explanation').classList.toggle('visible', view === 'force');
+
+      if (view === 'force') {
+        animateToForce();
+      }
+    }
+
+    function animateToForce() {
+      var duration = 800;
+
+      // Animate circle nodes
+      svg.selectAll('.node')
+        .transition()
+        .duration(duration)
+        .attr('cx', function (d) { return d.forceX; })
+        .attr('cy', function (d) { return d.forceY; });
+
+      // Animate diamond nodes
+      svg.selectAll('.node-diamond')
+        .transition()
+        .duration(duration)
+        .attr('x', function (d) { return d.forceX - 5; })
+        .attr('y', function (d) { return d.forceY - 5; })
+        .attr('transform', function (d) { return 'rotate(45, ' + d.forceX + ', ' + d.forceY + ')'; });
+
+      // Animate links
+      linkElements
+        .transition()
+        .duration(duration)
+        .attr('x1', function (d) { return d.source.forceX; })
+        .attr('y1', function (d) { return d.source.forceY; })
+        .attr('x2', function (d) { return d.target.forceX; })
+        .attr('y2', function (d) { return d.target.forceY; });
+    }
+
+    // ==================== VISUALIZATION UPDATE ====================
+
+    function updateSliderTrack(slider) {
+      var min = parseInt(slider.min);
+      var max = parseInt(slider.max);
+      var val = parseInt(slider.value);
+      var percent = ((val - min) / (max - min)) * 100;
+      slider.style.background = 'linear-gradient(to right, #f1c730 0%, #f1c730 ' + percent + '%, #4D4E53 ' + percent + '%, #4D4E53 100%)';
+    }
+
+    function updateVisualization() {
+      var slider = root.querySelector('#network-yearSlider');
+      var year = parseInt(slider.value);
+      root.querySelector('#network-yearDisplay').textContent = year;
+      updateSliderTrack(slider);
+
+      // Reset degrees
+      Object.keys(nodeDegrees).forEach(function (name) { nodeDegrees[name] = 0; });
+
+      var visibleEdgeCount = 0;
+      var connectedCount = 0;
+      var isolatedCount = 0;
+
+      // Update Leaflet edges
+      leafletEdges.forEach(function (polyline) {
+        var link = polyline.linkData;
+        var isVisible = link.connected_year <= year && visibleRailways[link.railway];
+        polyline.setStyle({ opacity: isVisible ? (link.isInterchange ? 0.3 : 0.6) : 0 });
+
+        if (isVisible) {
+          visibleEdgeCount++;
+          var sourceId = link.source.id || link.source;
+          var targetId = link.target.id || link.target;
+          nodeDegrees[sourceId]++;
+          nodeDegrees[targetId]++;
+        }
+      });
+
+      // Update D3 links
+      linkElements.attr('stroke-opacity', function (d) {
+        var isVisible = d.connected_year <= year && visibleRailways[d.railway];
+        return isVisible ? (d.isInterchange ? 0.3 : 0.6) : 0;
+      });
+
+      // Update Leaflet markers
+      Object.entries(leafletMarkers).forEach(function (entry) {
+        var name = entry[0], marker = entry[1];
+        var degree = nodeDegrees[name];
+        var sData = marker.settlementData;
+        var hasRailway = sData.railway_arrives && sData.railway_arrives <= year;
+        var color = railwayColors[sData.firstRailway] || '#666';
+
+        if (sData.multiRailway) {
+          var diamond = root.querySelector('.diamond[data-name="' + name + '"]');
+          if (diamond) {
+            if (degree > 0) {
+              connectedCount++;
+              var size = Math.min(8 + degree * 0.6, 14);
+              diamond.style.width = size + 'px';
+              diamond.style.height = size + 'px';
+              diamond.style.background = color;
+              diamond.style.borderColor = '#fff';
+              diamond.style.opacity = '1';
+            } else if (hasRailway) {
+              isolatedCount++;
+              diamond.style.width = '8px';
+              diamond.style.height = '8px';
+              diamond.style.background = '#888';
+              diamond.style.borderColor = '#aaa';
+              diamond.style.opacity = '0.6';
+            } else {
+              isolatedCount++;
+              diamond.style.width = '6px';
+              diamond.style.height = '6px';
+              diamond.style.background = '#444';
+              diamond.style.borderColor = '#666';
+              diamond.style.opacity = '0.4';
+            }
+          }
+        } else {
+          if (degree > 0) {
+            connectedCount++;
+            var radius = Math.min(4 + degree * 0.8, 12);
+            marker.setStyle({
+              radius: radius,
+              fillColor: color,
+              color: '#fff',
+              weight: 1,
+              fillOpacity: 0.8
+            });
+          } else if (hasRailway) {
+            isolatedCount++;
+            marker.setStyle({
+              radius: 4,
+              fillColor: '#888',
+              color: '#aaa',
+              weight: 1,
+              fillOpacity: 0.6
+            });
+          } else {
+            isolatedCount++;
+            marker.setStyle({
+              radius: 3,
+              fillColor: '#444',
+              color: '#666',
+              weight: 1,
+              fillOpacity: 0.4
+            });
+          }
+        }
+      });
+
+      // Update D3 nodes
+      svg.selectAll('.node')
+        .attr('r', function (d) {
+          var degree = nodeDegrees[d.id];
+          if (degree > 0) return Math.min(4 + degree * 0.5, 12);
+          if (d.railway_arrives && d.railway_arrives <= year) return 4;
+          return 3;
+        })
+        .attr('fill', function (d) {
+          var degree = nodeDegrees[d.id];
+          var hasRailway = d.railway_arrives && d.railway_arrives <= year;
+          if (degree > 0) return railwayColors[d.first_railway] || '#888';
+          if (hasRailway) return '#888';
+          return '#444';
+        })
+        .attr('opacity', function (d) {
+          var degree = nodeDegrees[d.id];
+          if (degree > 0) return 1;
+          if (d.railway_arrives && d.railway_arrives <= year) return 0.6;
+          return 0.3;
+        });
+
+      // Update D3 diamond nodes
+      svg.selectAll('.node-diamond')
+        .attr('width', function (d) {
+          var degree = nodeDegrees[d.id];
+          if (degree > 0) return Math.min(8 + degree * 0.4, 14);
+          return 8;
+        })
+        .attr('height', function (d) {
+          var degree = nodeDegrees[d.id];
+          if (degree > 0) return Math.min(8 + degree * 0.4, 14);
+          return 8;
+        })
+        .attr('fill', function (d) {
+          var degree = nodeDegrees[d.id];
+          var hasRailway = d.railway_arrives && d.railway_arrives <= year;
+          if (degree > 0) return railwayColors[d.first_railway] || '#888';
+          if (hasRailway) return '#888';
+          return '#444';
+        })
+        .attr('opacity', function (d) {
+          var degree = nodeDegrees[d.id];
+          if (degree > 0) return 1;
+          if (d.railway_arrives && d.railway_arrives <= year) return 0.6;
+          return 0.3;
+        });
+
+      // Update stats
+      var totalNodes = Object.keys(leafletMarkers).length;
+      var possibleEdges = (totalNodes * (totalNodes - 1)) / 2;
+      var density = possibleEdges > 0 ? ((visibleEdgeCount / possibleEdges) * 100).toFixed(2) : 0;
+
+      root.querySelector('#network-edgeCount').textContent = visibleEdgeCount;
+      root.querySelector('#network-densityValue').textContent = density + '%';
+      root.querySelector('#network-connectedCount').textContent = connectedCount;
+      root.querySelector('#network-isolatedCount').textContent = isolatedCount;
+
+      updateTopHubs();
+    }
+
+    function updateTopHubs() {
+      var sorted = Object.entries(nodeDegrees)
+        .filter(function (e) { return e[1] > 0; })
+        .sort(function (a, b) { return b[1] - a[1]; })
+        .slice(0, 5);
+
+      var hubsHtml = sorted.map(function (e, i) {
+        return '<li><span class="name">' + (i + 1) + '. ' + e[0] + '</span><span class="degree">' + e[1] + '</span></li>';
+      }).join('');
+
+      root.querySelector('#network-topHubs').innerHTML = hubsHtml || '<li><span class="name">No connected nodes</span></li>';
+    }
+
+    // ==================== TOOLTIPS ====================
+
+    function showTooltip(event, d) {
+      var tooltip = root.querySelector('#network-tooltip');
+      var railways = d.railways ? d.railways.map(function (r) { return r.railway + ' (' + r.year + ')'; }).join(', ') : 'None';
+      tooltip.innerHTML = '<strong>' + d.id + '</strong><br>Railways: ' + railways + '<br>Connections: ' + (nodeDegrees[d.id] || 0);
+      tooltip.style.left = (event.pageX + 10) + 'px';
+      tooltip.style.top = (event.pageY - 10) + 'px';
+      tooltip.style.opacity = 1;
+    }
+
+    function hideTooltip() {
+      root.querySelector('#network-tooltip').style.opacity = 0;
+    }
+
+    // ==================== RAILWAY TOGGLES ====================
+
+    function toggleRailway(railway) {
+      visibleRailways[railway] = !visibleRailways[railway];
+      var toggle = root.querySelector('.railway-toggle[data-railway="' + railway + '"]');
+      toggle.classList.toggle('inactive', !visibleRailways[railway]);
+      toggle.querySelector('input').checked = visibleRailways[railway];
+      updateVisualization();
+    }
+
+    // ==================== ANIMATION ====================
+
+    function togglePlay() {
+      if (isPlaying) {
+        clearInterval(playInterval);
+        root.querySelector('#network-playBtn').textContent = 'Play';
+        isPlaying = false;
+      } else {
+        isPlaying = true;
+        root.querySelector('#network-playBtn').textContent = 'Pause';
+        var year = parseInt(root.querySelector('#network-yearSlider').value);
+
+        playInterval = setInterval(function () {
+          year++;
+          if (year > 1920) {
+            clearInterval(playInterval);
+            root.querySelector('#network-playBtn').textContent = 'Play';
+            isPlaying = false;
+            return;
+          }
+          root.querySelector('#network-yearSlider').value = year;
+          updateVisualization();
+        }, 500);
+      }
+    }
+
+    function reset() {
+      if (isPlaying) togglePlay();
+      root.querySelector('#network-yearSlider').value = 1882;
+      updateVisualization();
+    }
+
+    // ==================== EVENT LISTENERS ====================
+
+    function setupEventListeners() {
+      root.querySelector('#network-geoBtn').addEventListener('click', function () { switchView('geo'); });
+      root.querySelector('#network-forceBtn').addEventListener('click', function () { switchView('force'); });
+      root.querySelector('#network-yearSlider').addEventListener('input', updateVisualization);
+      root.querySelector('#network-playBtn').addEventListener('click', togglePlay);
+      root.querySelector('#network-resetBtn').addEventListener('click', reset);
+
+      root.querySelectorAll('.railway-toggle').forEach(function (toggle) {
+        toggle.addEventListener('click', function (e) {
+          if (e.target.tagName !== 'INPUT') {
+            e.preventDefault();
+          }
+          toggleRailway(toggle.dataset.railway);
+        });
+      });
+
+      // Handle window resize (guarded)
+      window.addEventListener('resize', function () {
+        var container = root.querySelector('.view-container');
+        if (!container) return;
+        var w = container.clientWidth, h = container.clientHeight;
+        if (!w || !h) return;
+        graphWidth = w;
+        graphHeight = h;
+        svg.attr('width', graphWidth).attr('height', graphHeight);
+        if (map) map.invalidateSize();
+      });
+    }
+
+    // Boot the visualization (frame is now visible, so dimensions are valid)
+    initLeaflet();
+    initD3();
+    loadData();
+    setupEventListeners();
+  }
+
+  var io = new IntersectionObserver(function (entries, obs) {
+    entries.forEach(function (e) { if (e.isIntersecting) { init(); obs.disconnect(); } });
+  }, { rootMargin: '300px' });
+  io.observe(root);
+})();
+</script>
