@@ -24,8 +24,10 @@ format:
       - _custom.scss
       - _paper.scss
     toc: true
-    code-fold: true
-    code-tools: true
+    # This paper has no code cells, so the floating code-tools button would only
+    # collide with the TOC. (Other papers with code should keep these on.)
+    code-fold: false
+    code-tools: false
     anchor-sections: false
     title-block-style: default
     smooth-scroll: true

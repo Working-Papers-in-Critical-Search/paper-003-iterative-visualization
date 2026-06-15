@@ -4,24 +4,28 @@ subtitle: "Iterative Visualization with an LLM as a Research Method in Computati
 author:
   - name: Jessica Jack
     affiliation: University of Saskatchewan
+    orcid: 0009-0007-6752-8896
 date: "2026-06-15"
 doi: 10.5281/zenodo.20706174
 abstract: |
-  Agentic coding assistants have changed what is tractable for historians
-  without a technical background. This paper documents an iterative,
-  LLM-supported visualization method developed over the first months of an
-  MA thesis on Saskatchewan's urban settler network and Indigenous
-  dispossession, 1880–1921. Working in plain-English prompts with Claude
-  Code, the author brought three otherwise incompatible datasets — a
-  census-derived knowledge graph, a historical railway GIS layer, and reserve
-  surrender records — into conversation without writing code by hand. The
-  argument is that the value of the method lay not in the answers it produced
-  but in the questions it made askable: the analytical work migrated from
-  programming to history — forming questions, interrogating outputs, and
-  diagnosing failures. Several of the resulting interactive visualizations are
-  embedded live in the paper; the experiments that failed are shown as
-  static figures, because recognizing them as failures was itself a research
-  outcome.
+  Historians without programming skills face a practical constraint: complex,
+  multi-dataset research environments require technical mediation that can take
+  analytical energy away from historical inquiry and apply it towards technical
+  infrastructure. This paper documents an alternative. Working in plain English
+  with Claude Code, Anthropic's agentic coding LLM, I built bespoke interactive
+  visualizations across three heterogeneous datasets on Saskatchewan settler
+  colonialism (1880–1931): a census-derived knowledge graph, a historical
+  railway GIS dataset, and reserve surrender records. The iterative process of
+  describing a research question, generating a related visualization, reacting
+  to that visualization, and letting that reaction drive the next prompt,
+  functioned as a primary research method rather than an output workflow. The
+  process of learning how to use Claude Code and researching within its
+  constraints was also methodologically valuable. Visualizations generated
+  findings rather than illustrated them. Failed visualizations clarified
+  methodological constraints rather than representing wasted effort. I argue
+  that LLM-assisted iterative visualization is a tractable and analytically
+  transparent method for historians operating outside their technical comfort
+  zone.
 format:
   html:
     number-sections: false
@@ -112,6 +116,10 @@ And sometimes the failure was in the approach rather than the question. I wanted
 Historians are not ignorant of computational methods. What has kept many from exploring them is not interest nor access to digital data, but the gap between having a question and being able to usefully test it. This paper has argued that LLM-supported iterative visualizations are one method to help close this gap. This approach does not mean offloading the analytical work: the questions worth testing remain ours to identify and the failures remain ours to diagnose.
 
 What this process showed me is that the skepticism and professional rigour that AI requires are not a caveat. They are the method. Learning where the tool fell short also helped me to identify my own knowledge gaps, and going deeper into the data to compensate was where much of my historical thinking happened. The value of this process has not been in the answers it suggested, but in the questions it allowed me to ask.
+
+## About the Author
+
+Jessica Jack is a Master's student in the Department of History at the University of Saskatchewan. With a previous M.A. in medical anthropology, Jessica sought to apply her qualitative research skills to historical research and discovered an unexpected synergy with digital history, including mapping through HGIS and the emerging world of LLM-supported methodologies. Her research focuses on how settler colonialism in late 19th and early 20th century Saskatchewan was shaped by the conversion of prairie Indigenous territory into private property, and the impacts of that process on Indigenous dispossession in the province.
 
 ## Code and Data Availability
 
